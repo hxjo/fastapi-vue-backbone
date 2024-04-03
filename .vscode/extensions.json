@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "mikoz.autoflake-extension",
+    "ms-python.black-formatter",
+    "ms-vscode-remote.remote-containers",
+    "tamasfe.even-better-toml",
+    "ms-python.flake8",
+    "ms-python.isort",
+    "ms-python.mypy-type-checker",
+    "ms-python.vscode-pylance",
+    "ms-python.pylint",
+    "ms-python.python",
+    "ms-python.debugpy"
+  ]
+}

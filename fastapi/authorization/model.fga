@@ -1,0 +1,19 @@
+model
+  schema 1.1
+  
+type app
+  relations
+    define superuser: [user]
+    define client: [user] or superuser
+
+type user
+
+
+type user_self
+  relations
+    define parent_app: [app]
+    define self_user: [user]
+    define can_read: client from parent_app
+    define can_update: self_user or superuser from parent_app
+    define can_delete: self_user or superuser from parent_app
+

@@ -1,0 +1,35 @@
+name: "Backbone"
+model_file: './model.fga'
+tuples:
+  - user: user:superuser
+    relation: superuser
+    object: app:app
+
+  - user: user:superuser
+    relation: self_user
+    object: user_self:superuser
+
+  - user: app:app
+    relation: parent_app
+    object: user_self:superuser
+
+
+tests: 
+  - name: "Superuser"
+    description: "Superuser is superuser"
+    check:
+      - user: user:superuser
+        object: app:app
+        assertions: 
+          superuser: true
+
+  - name: "Client from app can read any user"
+    tuples:
+      - user: user:client
+        relation: client
+        object: app:app
+    check:
+      - user: user:client
+        object: user_self:superuser
+        assertions:
+          can_read: true

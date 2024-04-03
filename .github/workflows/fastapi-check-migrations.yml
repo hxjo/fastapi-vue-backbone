@@ -1,0 +1,21 @@
+name: Check migrations
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create .env
+      run: cp .env.example.docker .env
+    - name: Build docker
+      run: docker compose -p workflow up -d --build
+    - name: Run migrate
+      run: docker exec workflow-fastapi-1 poe migrate
+    - name: Check for uncommitted migration files
+      run: docker exec workflow-fastapi-1 alembic check ||  (echo "Uncommitted migration files detected. Please generate and commit migrations before merging." && exit 1)
