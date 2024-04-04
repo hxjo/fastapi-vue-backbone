@@ -7,8 +7,6 @@ RUN apt-get update \
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-COPY ~/.gitconfig /root/.gitconfig
-
 # Set the working directory
 WORKDIR /srv/vue
 
