@@ -34,4 +34,4 @@ jobs:
     - name: Build docker
       run: docker compose -p workflow up -d --build
     - name: Run test
-      run: docker exec workflow-fastapi-1 poe test
+      run: docker exec workflow-app-1 poe test

@@ -1,8 +1,8 @@
 {
-    "dockerComposeFile": "../../docker-compose.yml",
-    "service": "fastapi",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "app",
     "workspaceFolder": "/srv",
     "shutdownAction": "stopCompose",
     "initializeCommand": "find ~/.ssh/ -type f -exec grep -l 'PRIVATE' {} \\; | xargs ssh-add",
-    "postCreateCommand": "poe cmd setup setup-after-docker",
+    "postCreateCommand": "cd fastapi && poe cmd setup setup-after-docker",
 }
