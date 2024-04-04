@@ -5,10 +5,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 python3-pip gcc build-essential libssl-dev libffi-dev git openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Add Poetry to PATH
-ENV PATH="/root/.local/bin:$PATH"
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 
 # Set the working directory
@@ -26,17 +23,19 @@ COPY ./vue .
 
 WORKDIR /srv/fastapi
 
-COPY fastapi/pyproject.toml poetry.lock* ./
+COPY fastapi/requirements.txt ./
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+RUN uv venv
+ENV VIRTUAL_ENV=/srv/fastapi/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN uv pip install -r requirements.txt
 
 COPY ./fastapi .
 
-COPY start.sh /srv
-RUN chmod +x /srv/start.sh
+COPY start /srv
+RUN chmod +x /srv/start
 
 EXPOSE 8000
 EXPOSE 5173
-ENTRYPOINT ["/srv/start.sh"]
+ENTRYPOINT ["/srv/start"]
 
