@@ -41,6 +41,10 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+      meilisearch:
+        condition: service_started
+      openfga:
+        condition: service_started
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
