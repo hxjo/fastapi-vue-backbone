@@ -1,0 +1,15 @@
+{
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/srv",
+    "shutdownAction": "stopCompose",
+    "initializeCommand": "find ~/.ssh/ -type f -exec grep -l 'PRIVATE' {} \\; | xargs ssh-add",
+    "postCreateCommand": ["cd fastapi", "poe cmd setup setup-after-docker"],
+    "mounts": [
+        {
+            "source": "${localEnv:HOME}/.gitconfig",
+            "target":"/root/.gitconfig",
+            "type":"bind",
+        }
+    ]
+}

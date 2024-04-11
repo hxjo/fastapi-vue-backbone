@@ -1,0 +1,37 @@
+name: Fastapi - Lint and test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+    - name: Install Poetry
+      working-directory: ./fastapi
+      run: pip install poetry
+    - name: Install dependencies
+      working-directory: ./fastapi
+      run: poetry install
+    - name: Lint & format check
+      working-directory: ./fastapi
+      run: poetry run poe ci_check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create .env
+      run: cp .env.example.docker .env
+    - name: Build docker
+      run: docker compose -p workflow up -d --build
+    - name: Run test
+      run: docker exec workflow-app-1 poe test

@@ -1,0 +1,100 @@
+{
+    "schema_version": "1.1",
+    "type_definitions": [
+        {
+            "metadata": {
+                "relations": {
+                    "client": {
+                        "directly_related_user_types": [
+                            {
+                                "type": "user"
+                            }
+                        ]
+                    },
+                    "superuser": {
+                        "directly_related_user_types": [
+                            {
+                                "type": "user"
+                            }
+                        ]
+                    }
+                }
+            },
+            "relations": {
+                "client": {
+                    "union": {
+                        "child": [
+                            {
+                                "this": {}
+                            },
+                            {
+                                "computedUserset": {
+                                    "relation": "superuser"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "superuser": {
+                    "this": {}
+                }
+            },
+            "type": "app"
+        },
+        {
+            "type": "user"
+        },
+        {
+            "metadata": {
+                "relations": {
+                    "can_delete": {},
+                    "can_read": {},
+                    "can_update": {},
+                    "parent_app": {
+                        "directly_related_user_types": [
+                            {
+                                "type": "app"
+                            }
+                        ]
+                    },
+                    "self_user": {
+                        "directly_related_user_types": [
+                            {
+                                "type": "user"
+                            }
+                        ]
+                    }
+                }
+            },
+            "relations": {
+                "can_delete": {
+                    "computedUserset": {
+                        "relation": "self_user"
+                    }
+                },
+                "can_read": {
+                    "tupleToUserset": {
+                        "computedUserset": {
+                            "relation": "client"
+                        },
+                        "tupleset": {
+                            "relation": "parent_app"
+                        }
+                    }
+                },
+                "can_update": {
+                    "computedUserset": {
+                        "relation": "self_user"
+                    }
+                },
+                "parent_app": {
+                    "this": {}
+                },
+                "self_user": {
+                    "this": {}
+                }
+            },
+            "type": "user_self"
+        }
+    ]
+}
