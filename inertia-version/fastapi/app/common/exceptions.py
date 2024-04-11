@@ -1,12 +1,11 @@
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
-
 
 
 class ErrorEvents(Enum):
@@ -36,7 +35,7 @@ class CommonDetailedException(Exception):
         target: str,
         ids: Optional[list[int]] = None,
         additional_info: Optional[str] = None,
-    ):
+    ) -> None:
         self.status_code = status_code
         self.message = get_error_message(target, event, additional_info)
         self.ids = ids
@@ -56,22 +55,16 @@ async def common_error_handler(
     )
 
 
-async def invalid_token_handler(
-    *args, **kwargs
-) -> RedirectResponse:
-    return RedirectResponse('/login')
+async def invalid_token_handler(*args: Any, **kwargs: Any) -> RedirectResponse:
+    return RedirectResponse("/login")
 
 
-async def already_logged_in_handler(
-    *args, **kwargs
-) -> RedirectResponse:
-    return RedirectResponse('/app')
-
-
+async def already_logged_in_handler(*args: Any, **kwargs: Any) -> RedirectResponse:
+    return RedirectResponse("/app")
 
 
 class NotFoundException(CommonDetailedException):
-    def __init__(self, target: str, ids: Optional[list[int]] = None):
+    def __init__(self, target: str, ids: Optional[list[int]] = None) -> None:
         super().__init__(
             event=ErrorEvents.NOT_FOUND,
             status_code=status.HTTP_404_NOT_FOUND,
@@ -86,7 +79,7 @@ class BadRequestException(CommonDetailedException):
         target: str,
         ids: Optional[list[int]] = None,
         additional_info: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             event=ErrorEvents.BAD_REQUEST,
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,7 +95,7 @@ class UnauthorizedException(CommonDetailedException):
         target: str,
         ids: Optional[list[int]] = None,
         additional_info: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             event=ErrorEvents.UNAUTHORIZED,
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -130,7 +123,7 @@ class ForbiddenException(CommonDetailedException):
     def __init__(
         self,
         target: str,
-    ):
+    ) -> None:
         super().__init__(
             event=ErrorEvents.FORBIDDEN,
             status_code=status.HTTP_403_FORBIDDEN,

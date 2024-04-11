@@ -129,7 +129,9 @@ class UserRepoClass(BaseRepo[User, UserCreate, UserUpdate]):
         )
         return Token(access_token=access_token)
 
-    async def set_avatar_url(self, session: AsyncSession, id_: int, avatar: UploadFile) -> User:
+    async def set_avatar_url(
+        self, session: AsyncSession, id_: int, avatar: UploadFile
+    ) -> User:
         user = await self.get(session, id_=id_)
         user.avatar_url = avatar
         await session.commit()

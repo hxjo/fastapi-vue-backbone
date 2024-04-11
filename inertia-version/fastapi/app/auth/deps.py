@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Annotated, Optional, Union, cast
+from typing import Annotated, Union, cast
 
 from fastapi import Depends, Request
-from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer as OAuth2PasswordBearer_
 from jose import JWTError
 from sqlmodel import select
@@ -13,7 +12,7 @@ from app.auth.models import AdminToken
 from app.auth.utils.auth import get_token_content
 from app.common.deps.db import SessionDep
 from app.common.exceptions import NotFoundException
-from app.user.models import User, UserOut
+from app.user.models import User
 from app.user.repository import UserRepo
 
 
@@ -27,7 +26,7 @@ class OAuth2PasswordBearer(OAuth2PasswordBearer_):
         )
 
     async def __call__(self, request: Request) -> Union[str, None]:
-        token = request.cookies.get('token', None)
+        token = request.cookies.get("token", None)
         return token
 
 
@@ -77,20 +76,28 @@ CurrentUserDep = Depends(get_current_user)
 AnnotatedCurrentUserDep = Annotated[User, CurrentUserDep]
 
 
-async def redirect_if_already_logged_in(*, token: AnnotatedTokenDep, session: SessionDep):
+async def redirect_if_already_logged_in(
+    *, token: AnnotatedTokenDep, session: SessionDep
+) -> None:
     try:
         await get_current_user(token=token, session=session)
         raise AlreadyLoggedInException()
     except InvalidTokenException:
         pass
 
+
 RedirectIfAlreadyLoggedInDep = Depends(redirect_if_already_logged_in)
 
 
-async def get_current_user_or_none(*, token: AnnotatedTokenDep, session: SessionDep):
+async def get_current_user_or_none(
+    *, token: AnnotatedTokenDep, session: SessionDep
+) -> Union[User, None]:
     try:
         return await get_current_user(token=token, session=session)
     except InvalidTokenException:
         return None
 
-AnnotatedCurrentUserOrNoneDep = Annotated[Union[User, None], Depends(get_current_user_or_none)]
+
+AnnotatedCurrentUserOrNoneDep = Annotated[
+    Union[User, None], Depends(get_current_user_or_none)
+]

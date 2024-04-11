@@ -1,7 +1,7 @@
-from typing import Any
+from typing import Any, Callable, Dict, TypeVar, cast
 
 from fastapi import Request
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, Response
 from json import dumps as json_encode
 from functools import wraps
 from .settings import settings
@@ -78,16 +78,19 @@ async def render(
     return HTMLResponse(content=content)
 
 
-def inertia(component: str) -> Any:
-    def decorator(func: Any) -> Any:
+T = TypeVar("T")
+
+
+def inertia(component: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        async def inner(request: Request, *args: Any, **kwargs: Any) -> Any:
+        async def inner(request: Request, *args: Any, **kwargs: Any) -> Response:
             props = await func(request, *args, **kwargs)
 
             if not isinstance(props, dict):
-                return props
+                return cast(Response, props)
 
-            return await render(request, component, props)
+            return await render(request, component, cast(Dict[str, Any], props))
 
         return inner
 

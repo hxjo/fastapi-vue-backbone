@@ -1,8 +1,7 @@
 import subprocess
 import typer
 from dotenv import load_dotenv
-from rich.prompt import Prompt
-from .docker import up, upall, init_db
+from .docker import upall, init_db
 from .authz import setup_store, write_authorization_model
 from .print import print_success
 

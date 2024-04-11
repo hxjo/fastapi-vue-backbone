@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from fastapi import APIRouter, Request
 from app.libs.inertia import inertia
@@ -20,7 +19,7 @@ async def index(request: Request, maybe_user: AnnotatedCurrentUserOrNoneDep):
 @webapp_router.get("/app")
 @inertia("AppView")
 async def app(request: Request, user: AnnotatedCurrentUserDep):
-    message = request.cookies.get('message', None)
+    message = request.cookies.get("message", None)
     message_: Message | None = None
     if message is not None:
         message_ = Message(
@@ -29,4 +28,3 @@ async def app(request: Request, user: AnnotatedCurrentUserDep):
         )
 
     return AppOut(user=UserOut.from_orm(user), message=message_).model_dump()
-

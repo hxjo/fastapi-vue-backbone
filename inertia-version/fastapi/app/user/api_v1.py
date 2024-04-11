@@ -13,9 +13,13 @@ from app.core.config import settings
 from app.user.deps import (
     CurrentCanDeleteUser,
     CurrentCanReadUser,
-    CurrentCanUpdateUser, UserExists,
+    CurrentCanUpdateUser,
+    UserExists,
 )
-from app.user.exceptions import EmailAlreadyRegisteredException, PasswordNotStrongException
+from app.user.exceptions import (
+    EmailAlreadyRegisteredException,
+    PasswordNotStrongException,
+)
 from app.user.models import UserCreate, UserOut, UserUpdate
 from app.user.repository import UserRepo
 
@@ -29,15 +33,29 @@ router = APIRouter()
 async def create_user(_user: UserCreate, *, deps: AnnotatedCommonDep):
     try:
         user = await UserRepo.create(deps, obj_in=_user)
-        token = create_access_token({'email': user.email})
-        response = RedirectResponse(url=f"/app", status_code=303)
-        response.set_cookie(key="token", value=token, httponly=True, samesite=None, secure=True, expires=datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+        token = create_access_token({"email": user.email})
+        response = RedirectResponse(url="/app", status_code=303)
+        response.set_cookie(
+            key="token",
+            value=token,
+            httponly=True,
+            samesite=None,
+            secure=True,
+            expires=datetime.now(timezone.utc)
+            + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
         return response
     except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
-        response = RedirectResponse(url=f"/signup", status_code=303)
-        response.set_cookie(key="error", value=exc.message, httponly=True, samesite=None, secure=True, expires=3)
+        response = RedirectResponse(url="/signup", status_code=303)
+        response.set_cookie(
+            key="error",
+            value=exc.message,
+            httponly=True,
+            samesite=None,
+            secure=True,
+            expires=3,
+        )
         return response
-
 
 
 @router.get("/", response_model=list[UserOut])
@@ -78,18 +96,32 @@ async def get_user_by_id(
     status_code=201,
     dependencies=[CurrentCanUpdateUser],
 )
-async def update_user(request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep):
+async def update_user(
+    request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep
+):
     referer = request.headers.get("Referer")
     parsed_referer_url = urlparse(referer)
     request_from = parsed_referer_url.path
     response = RedirectResponse(url=str(request_from), status_code=303)
     try:
         await UserRepo.update(deps, id_=user_id, obj_in=user)
-        response.set_cookie(key="message", value="user.update_success", httponly=True, samesite=None, secure=True,
-                        expires=3)
+        response.set_cookie(
+            key="message",
+            value="user.update_success",
+            httponly=True,
+            samesite=None,
+            secure=True,
+            expires=3,
+        )
     except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
-        response.set_cookie(key="error", value=exc.message, httponly=True, samesite=None, secure=True,
-                        expires=3)
+        response.set_cookie(
+            key="error",
+            value=exc.message,
+            httponly=True,
+            samesite=None,
+            secure=True,
+            expires=3,
+        )
     return response
 
 

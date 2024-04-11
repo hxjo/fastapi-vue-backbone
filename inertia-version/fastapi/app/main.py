@@ -11,7 +11,9 @@ from app.webapp.api import webapp_router
 from app.libs.inertia import InertiaMiddleware, settings as inertia_settings
 from app.common.exceptions import (
     CommonDetailedException,
-    already_logged_in_handler, common_error_handler, invalid_token_handler,
+    already_logged_in_handler,
+    common_error_handler,
+    invalid_token_handler,
 )
 from app.core.admin import create_admin
 from app.core.config import settings

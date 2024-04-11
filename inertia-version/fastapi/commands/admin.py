@@ -53,6 +53,7 @@ async def async_create_superuser():
 def set_superuser() -> None:
     asyncio.run(async_set_superuser())
 
+
 async def async_set_superuser() -> None:
     """
     Set a user as superuser
