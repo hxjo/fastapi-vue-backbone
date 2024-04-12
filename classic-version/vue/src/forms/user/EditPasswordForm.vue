@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
-import type { UserOut } from '@/api'
+import { type UserOut, UsersService } from '@/api'
 import { useEditPasswordForm } from '@/forms/user/composables/useEditPasswordForm'
-import { router } from '@inertiajs/vue3'
+
 import PasswordField from '@/forms/components/PasswordField.vue'
+import useSafeRequest from '@/composables/useSafeRequest'
 interface Props {
   user: UserOut
 }
 
 const props = defineProps<Props>()
-
 const { form, isFormComplete, hasFormChanged } = useEditPasswordForm()
 
-const onSubmit = form.handleSubmit((values) => {
-  router.patch(`/api/v1/users/${props.user.id}`, { password: values.password })
+const onSubmit = form.handleSubmit(async (values) => {
+  await useSafeRequest(UsersService.updateUserApiV1UsersUserIdPatch, {
+    userId: props.user.id,
+    requestBody: {
+      password: values.password
+    }
+  })
 })
 </script>
 

@@ -8,22 +8,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
-import type { UserOut } from '@/api'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { computed } from 'vue'
-import { Link } from '@inertiajs/vue3'
 import { DialogTrigger, Dialog } from '@/components/ui/dialog'
 import EditProfileDialog from '@/components/user-settings/EditProfileDialog.vue'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import { storeToRefs } from 'pinia'
 
-interface Props {
-  user: UserOut
-}
+const { user } = storeToRefs(useCurrentUserStore())
+const userInitial = computed(() => user.value.username[0].toUpperCase())
 
-const props = defineProps<Props>()
-
-const userInitial = computed(() => props.user.username[0].toUpperCase())
-
-const userName = computed(() => props.user.first_name ?? props.user.username)
+const userName = computed(() => user.value.first_name ?? user.value.username)
 </script>
 
 <template>
@@ -51,10 +46,10 @@ const userName = computed(() => props.user.first_name ?? props.user.username)
         <DropdownMenuSeparator />
 
         <DropdownMenuItem>
-          <Link href="/logout" class="menu-item">
+          <RouterLink to="/auth/logout" class="menu-item">
             <Icon icon="radix-icons:exit" />
             {{ $t('auth.logOut') }}
-          </Link>
+          </RouterLink>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

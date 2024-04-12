@@ -29,6 +29,10 @@ export interface TranslationRecord {
       passwordStrength: string
       invalidToken: string
     }
+    success: {
+      recoveryEmail: string
+      resetPassword: string
+    }
   }
   user: {
     profile: string
@@ -39,6 +43,9 @@ export interface TranslationRecord {
     username: string
     firstName: string
     lastName: string
+    success: {
+      update: string
+    }
   }
   forms: {
     continue: string
@@ -72,8 +79,6 @@ export interface TranslationRecord {
         invalid_credentials: string
         password_not_strong: string
       }
-      recovery_email_sent: string
-      password_reset_success: string
     }
     user: {
       conflict: {
@@ -82,7 +87,7 @@ export interface TranslationRecord {
       invalid: {
         inactive: string
       }
-      update_success: string
     }
+    internalServerError: string
   }
 }

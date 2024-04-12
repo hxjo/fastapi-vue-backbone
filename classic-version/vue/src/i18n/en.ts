@@ -31,6 +31,10 @@ export const EnglishTranslationRecord: TranslationRecord = {
       passwordStrength:
         'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character.',
       invalidToken: 'Invalid token'
+    },
+    success: {
+      recoveryEmail: 'Recovery email sent',
+      resetPassword: 'Password reset successfully'
     }
   },
   user: {
@@ -41,7 +45,10 @@ export const EnglishTranslationRecord: TranslationRecord = {
     },
     username: 'Username',
     firstName: 'First name',
-    lastName: 'Last name'
+    lastName: 'Last name',
+    success: {
+      update: 'User updated successfully'
+    }
   },
   forms: {
     continue: 'Continue',
@@ -74,9 +81,7 @@ export const EnglishTranslationRecord: TranslationRecord = {
       invalid: {
         invalid_credentials: 'Invalid credentials',
         password_not_strong: 'Password not strong enough'
-      },
-      recovery_email_sent: 'Recovery email sent',
-      password_reset_success: 'Password reset successfully'
+      }
     },
     user: {
       conflict: {
@@ -84,8 +89,8 @@ export const EnglishTranslationRecord: TranslationRecord = {
       },
       invalid: {
         inactive: 'Inactive user'
-      },
-      update_success: 'User updated successfully'
-    }
+      }
+    },
+    internalServerError: 'Internal server error'
   }
 }

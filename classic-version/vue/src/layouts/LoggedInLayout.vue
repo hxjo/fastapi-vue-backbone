@@ -1,23 +1,16 @@
 <script setup lang="ts">
 import ClientHeader from '@/components/ClientHeader.vue'
-import type { UserOut } from '@/api'
 import UserSettings from '@/components/user-settings/UserSettings.vue'
 defineOptions({
   inheritAttrs: false
 })
-
-interface Props {
-  user: UserOut
-}
-
-defineProps<Props>()
 </script>
 
 <template>
   <div>
     <ClientHeader>
       <template #top-right>
-        <UserSettings :user="user" />
+        <UserSettings />
       </template>
     </ClientHeader>
     <main v-bind="$attrs">

@@ -3,21 +3,42 @@ import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
 import { useResetPasswordForm } from '@/forms/auth/composables/useResetPasswordForm'
 import PasswordField from '@/forms/components/PasswordField.vue'
-import { router } from '@inertiajs/vue3'
-import type { NewPassword } from '@/api'
+import { type NewPassword, LoginService } from '@/api'
+import useSafeRequest from '@/composables/useSafeRequest'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import { useI18n } from 'vue-i18n'
+import { useToast } from '@/components/ui/toast'
+import { useRouter } from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
 const { form, isFormComplete } = useResetPasswordForm()
-
 interface Props {
   email: string
   token: string
 }
+const { t } = useI18n()
+const { toast } = useToast()
+const router = useRouter()
+const cookies = useCookies()
+
 const props = defineProps<Props>()
-const onSubmit = form.handleSubmit((values) => {
+const onSubmit = form.handleSubmit(async (values) => {
   const data: NewPassword = {
     token: props.token,
     password: values.password
   }
-  router.post(`/api/reset-password/`, data)
+  const user = await useSafeRequest(LoginService.resetPasswordApiResetPasswordPost, {
+    requestBody: data
+  })
+  if (user) {
+    cookies.set('access_token', props.token, {
+      path: '/'
+    })
+    useCurrentUserStore().setUser(user)
+    toast({
+      title: t('auth.success.resetPassword')
+    })
+    await router.push('/')
+  }
 })
 </script>
 

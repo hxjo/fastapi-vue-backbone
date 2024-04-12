@@ -31,6 +31,10 @@ export const FrenchTranslationRecord: TranslationRecord = {
       passwordStrength:
         'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.',
       invalidToken: 'Token invalide'
+    },
+    success: {
+      recoveryEmail: 'Email de récupération envoyé',
+      resetPassword: 'Mot de passe réinitialisé'
     }
   },
   user: {
@@ -41,7 +45,10 @@ export const FrenchTranslationRecord: TranslationRecord = {
     },
     username: "Nom d'utilisateur",
     firstName: 'Prénom',
-    lastName: 'Nom de famille'
+    lastName: 'Nom de famille',
+    success: {
+      update: 'Utilisateur mis à jour avec succès'
+    }
   },
   forms: {
     continue: 'Continuer',
@@ -74,9 +81,7 @@ export const FrenchTranslationRecord: TranslationRecord = {
       invalid: {
         invalid_credentials: 'Identifiants invalides',
         password_not_strong: 'Mot de passe pas assez fort'
-      },
-      recovery_email_sent: 'Email de récupération envoyé',
-      password_reset_success: 'Mot de passe réinitialisé'
+      }
     },
     user: {
       conflict: {
@@ -84,8 +89,8 @@ export const FrenchTranslationRecord: TranslationRecord = {
       },
       invalid: {
         inactive: 'Utilisateur inactif'
-      },
-      update_success: 'Utilisateur mis à jour avec succès'
-    }
+      }
+    },
+    internalServerError: 'Erreur interne du serveur'
   }
 }

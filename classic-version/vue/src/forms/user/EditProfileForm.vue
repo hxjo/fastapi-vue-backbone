@@ -2,32 +2,51 @@
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
 import EmailField from '@/forms/components/EmailField.vue'
-import type { UserOut } from '@/api'
+import { type UserOut, UsersService } from '@/api'
 import { useEditProfileForm } from '@/forms/user/composables/useEditProfileForm'
 import InputField from '@/forms/components/InputField.vue'
-import { router } from '@inertiajs/vue3'
 import NameField from '@/forms/components/NameField.vue'
+import useSafeRequest from '@/composables/useSafeRequest'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import { useToast } from '@/components/ui/toast'
+import { useI18n } from 'vue-i18n'
 interface Props {
   user: UserOut
 }
 
 const props = defineProps<Props>()
-
 const { form, isFormComplete, hasFormChanged } = useEditProfileForm(props.user)
+const { toast } = useToast()
+const { t } = useI18n()
 
-const onSubmit = form.handleSubmit((values) => {
-  if (values.avatar) {
-    const formData = new FormData()
-    formData.append('avatar', values.avatar)
-    fetch(`/api/v1/users/${props.user.id}/avatar`, {
-      method: 'POST',
-      body: formData
+const onSubmit = form.handleSubmit(async (values) => {
+  if (values.avatar_url && typeof values.avatar_url !== 'string') {
+    await useSafeRequest(UsersService.setUserAvatarApiV1UsersUserIdAvatarPost, {
+      userId: props.user.id,
+      formData: {
+        avatar: values.avatar_url
+      }
     })
   }
   const changedValues = Object.fromEntries(
     Object.entries(values).filter(([key, value]) => props.user[key as keyof UserOut] !== value)
   )
-  router.patch(`/api/v1/users/${props.user.id}`, { ...changedValues, avatar: undefined })
+  const hasChanged = Object.keys(changedValues).length
+  if (hasChanged) {
+    const user = await useSafeRequest(UsersService.updateUserApiV1UsersUserIdPatch, {
+      userId: props.user.id,
+      requestBody: changedValues
+    })
+    if (user) {
+      useCurrentUserStore().setUser(user)
+    }
+  }
+  if (hasChanged || values.avatar_url) {
+    toast({
+      title: t('user.success.update'),
+      duration: 3000
+    })
+  }
 })
 </script>
 
@@ -57,7 +76,7 @@ const onSubmit = form.handleSubmit((values) => {
     <InputField
       :is-field-dirty="() => true"
       :label="$t('user.editProfileModal.avatar')"
-      fieldName="avatar"
+      fieldName="avatar_url"
     />
     <Button type="submit" :disabled="!isFormComplete || !hasFormChanged">
       {{ $t('forms.save') }}

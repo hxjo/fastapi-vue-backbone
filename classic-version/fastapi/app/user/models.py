@@ -1,10 +1,11 @@
 from typing import Annotated, Union
 
 from fastapi import UploadFile
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import Column
 from sqlmodel import AutoString, Field, SQLModel
 
+from app.auth.models import Token
 from app.common.models import FileType
 
 
@@ -50,3 +51,8 @@ class UserOut(UserBase):
     avatar_url: Union[str, None] = None
     first_name: Union[str, None] = None
     last_name: Union[str, None] = None
+
+
+class UserAndToken(BaseModel):
+    user: UserOut
+    token: Token

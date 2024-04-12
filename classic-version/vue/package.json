@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.1",
-    "@inertiajs/vue3": "^1.0.15",
     "@radix-icons/vue": "^1.0.0",
     "@vee-validate/zod": "^4.12.6",
     "@vueuse/core": "^10.9.0",
@@ -32,6 +31,7 @@
     "vee-validate": "^4.12.6",
     "vue": "^3.4.15",
     "vue-i18n": "^9.11.0",
+    "vue-router": "^4.3.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

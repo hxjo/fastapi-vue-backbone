@@ -1,22 +1,36 @@
 <script setup lang="ts">
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
-import { router } from '@inertiajs/vue3'
+
 import EmailField from '@/forms/components/EmailField.vue'
 import { useSignupForm } from '@/forms/auth/composables/useSignupForm'
 import PasswordField from '@/forms/components/PasswordField.vue'
-import type { UserCreate } from '@/api'
+import { OpenAPI, type UserCreate, UsersService } from '@/api'
 import NameField from '@/forms/components/NameField.vue'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import { useRouter } from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import useSafeRequest from '@/composables/useSafeRequest'
 
 const { form, isFieldSelected, isFormComplete } = useSignupForm()
+const router = useRouter()
+const cookies = useCookies()
 
-const onSubmit = form.handleSubmit((values) => {
+const onSubmit = form.handleSubmit(async (values) => {
   const data: UserCreate = {
     email: values.email,
     username: values.username,
     password: values.password
   }
-  router.post('/api/v1/users', data)
+  const response = await useSafeRequest(UsersService.createUserApiV1UsersPost, {
+    requestBody: data
+  })
+  if (response) {
+    cookies.set('access_token', response.token.access_token)
+    useCurrentUserStore().setUser(response.user)
+    OpenAPI.TOKEN = response.token.access_token
+    await router.push('/')
+  }
 })
 </script>
 

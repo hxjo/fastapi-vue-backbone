@@ -1,22 +1,15 @@
-from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
-
 from fastapi import APIRouter, Request, UploadFile
-from starlette.responses import RedirectResponse
-
 from app.auth.deps import AnnotatedCurrentUserDep, CurrentUserDep
-from app.auth.utils.auth import create_access_token
 from app.common.deps.common import AnnotatedCommonDep
 from app.common.deps.db import SessionDep
 from app.common.deps.search import AnnotatedSearchClientsDep
-from app.core.config import settings
 from app.user.deps import (
     CurrentCanDeleteUser,
     CurrentCanReadUser,
-    CurrentCanUpdateUser, UserExists,
+    CurrentCanUpdateUser,
+    UserExists,
 )
-from app.user.exceptions import EmailAlreadyRegisteredException, PasswordNotStrongException
-from app.user.models import UserCreate, UserOut, UserUpdate
+from app.user.models import UserCreate, UserOut, UserUpdate, UserAndToken
 from app.user.repository import UserRepo
 
 router = APIRouter()
@@ -24,20 +17,19 @@ router = APIRouter()
 
 @router.post(
     "/",
+    response_model=UserAndToken,
     status_code=201,
 )
 async def create_user(_user: UserCreate, *, deps: AnnotatedCommonDep):
-    try:
-        user = await UserRepo.create(deps, obj_in=_user)
-        token = create_access_token({'email': user.email})
-        response = RedirectResponse(url=f"/app", status_code=303)
-        response.set_cookie(key="token", value=token, httponly=True, samesite=None, secure=True, expires=datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-        return response
-    except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
-        response = RedirectResponse(url=f"/signup", status_code=303)
-        response.set_cookie(key="error", value=exc.message, httponly=True, samesite=None, secure=True, expires=3)
-        return response
-
+    user = await UserRepo.create(deps, obj_in=_user)
+    user_out = UserOut.from_orm(user)
+    token = await UserRepo.authenticate(
+        deps.session, email=user.email, password=_user.password
+    )
+    return UserAndToken(
+        user=user_out,
+        token=token,
+    )
 
 
 @router.get("/", response_model=list[UserOut])
@@ -78,28 +70,20 @@ async def get_user_by_id(
     status_code=201,
     dependencies=[CurrentCanUpdateUser],
 )
-async def update_user(request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep):
-    referer = request.headers.get("Referer")
-    parsed_referer_url = urlparse(referer)
-    request_from = parsed_referer_url.path
-    response = RedirectResponse(url=str(request_from), status_code=303)
-    try:
-        await UserRepo.update(deps, id_=user_id, obj_in=user)
-        response.set_cookie(key="message", value="user.update_success", httponly=True, samesite=None, secure=True,
-                        expires=3)
-    except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
-        response.set_cookie(key="error", value=exc.message, httponly=True, samesite=None, secure=True,
-                        expires=3)
-    return response
+async def update_user(
+    request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep
+):
+    return await UserRepo.update(deps, id_=user_id, obj_in=user)
 
 
 @router.post(
     "/{user_id}/avatar",
     status_code=201,
+    response_model=UserOut,
     dependencies=[CurrentCanUpdateUser],
 )
 async def set_user_avatar(user_id: int, avatar: UploadFile, *, session: SessionDep):
-    await UserRepo.set_avatar_url(session, id_=user_id, avatar=avatar)
+    return await UserRepo.set_avatar_url(session, id_=user_id, avatar=avatar)
 
 
 @router.delete(

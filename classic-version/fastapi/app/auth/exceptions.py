@@ -1,4 +1,4 @@
-from app.common.exceptions import BadRequestException
+from app.common.exceptions import BadRequestException, UnauthorizedException
 
 
 class InvalidCredentialsException(BadRequestException):
@@ -6,9 +6,6 @@ class InvalidCredentialsException(BadRequestException):
         super().__init__(target="auth", additional_info="invalid_credentials")
 
 
-class InvalidTokenException(Exception):
-    pass
-
-
-class AlreadyLoggedInException(Exception):
-    pass
+class InvalidTokenException(UnauthorizedException):
+    def __init__(self) -> None:
+        super().__init__(target="auth")

@@ -27,7 +27,7 @@ class TestUserRoutes:
         }
         response = await client.post(get_route(create_user), json=payload)
         assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers['location'] == "/app"
+        assert response.headers["location"] == "/app"
         set_cookie = response.headers["set-cookie"]
         token = set_cookie.split(";")[0].split("=")[1]
         assert token is not None
@@ -35,7 +35,6 @@ class TestUserRoutes:
         assert user.username == payload["username"]
         assert user.is_active is True
         assert verify_password_against_hash(payload["password"], user.hashed_password)
-
 
     async def test_get_user_by_id_endpoint(self, client, factory):
         user = await factory(User)
@@ -58,12 +57,12 @@ class TestUserRoutes:
         }
 
         response = await client.patch(
-            get_route(update_user, user_id=user.id), json=payload, headers={
-                "Referer": "/app"
-            }
+            get_route(update_user, user_id=user.id),
+            json=payload,
+            headers={"Referer": "/app"},
         )
         assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers['location'] == "/app"
+        assert response.headers["location"] == "/app"
         assert verify_password_against_hash(new_password, user.hashed_password)
 
     async def test_delete_user_endpoint(self, session, factory, client):
@@ -84,7 +83,6 @@ class TestUserRoutes:
         content = response.json()
         assert content["email"] == user.email
         assert content["username"] == user.username
-
 
     async def test_search_users_does_not_return_self(self, factory, client):
         for _ in range(10):

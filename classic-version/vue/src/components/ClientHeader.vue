@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import ThemeSelector from '@/components/site-settings/SiteSettings.vue'
-import { Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
-
-const page = usePage()
-const href = computed(() => {
-  return new URL(page.url).pathname
-})
+import { useRoute } from 'vue-router'
+const route = useRoute()
 </script>
 
 <template>
   <header>
     <div class="logo-and-settings">
-      <Link v-if="href !== '/'" href="/" class="logo"> Acme Inc. </Link>
+      <RouterLink v-if="route.path !== '/'" to="/" class="logo"> Acme Inc. </RouterLink>
       <span v-else class="logo">Acme Inc.</span>
       <ThemeSelector />
     </div>

@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import ClientLayout from '@/layouts/ClientLayout.vue'
 import SignupForm from '@/forms/auth/SignupForm.vue'
-import { Link } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
-import { computed } from 'vue'
-import type { MessageProps } from '@/messageProps'
-import { useServerMessages } from '@/composables/useServerMessages'
-interface Props extends MessageProps {}
-const props = defineProps<Props>()
-
-const message = computed(() => props.message)
-useServerMessages(message)
 </script>
 
 <template>
   <ClientLayout class="main">
     <template #header-top-right>
-      <Link href="/login">
+      <RouterLink to="/auth/login">
         <Button variant="outline">
           {{ $t('auth.logIn.header') }}
         </Button>
-      </Link>
+      </RouterLink>
     </template>
     <SignupForm />
   </ClientLayout>

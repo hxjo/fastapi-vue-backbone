@@ -1,21 +1,36 @@
 <script setup lang="ts">
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
-import { router, Link } from '@inertiajs/vue3'
 import { useLoginForm } from '@/forms/auth/composables/useLoginForm'
 import EmailField from '@/forms/components/EmailField.vue'
 import PasswordField from '@/forms/components/PasswordField.vue'
-import type { Body_api_login_api_login_post } from '@/api'
-const { form, isFormComplete } = useLoginForm()
+import { type Body_api_login_api_login_post, LoginService, OpenAPI } from '@/api'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import { useRouter } from 'vue-router'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import useSafeRequest from '@/composables/useSafeRequest'
 
-const onSubmit = form.handleSubmit((values) => {
+const { form, isFormComplete } = useLoginForm()
+const cookies = useCookies()
+const router = useRouter()
+
+const onSubmit = form.handleSubmit(async (values) => {
   const data: Body_api_login_api_login_post = {
     username: values.email,
     password: values.password
   }
-  router.post('/api/login', data, {
-    forceFormData: true
+  const response = await useSafeRequest(LoginService.apiLoginApiLoginPost, {
+    formData: {
+      username: data.username,
+      password: data.password
+    }
   })
+  if (response) {
+    cookies.set('access_token', response.token.access_token, { path: '/' })
+    useCurrentUserStore().setUser(response.user)
+    OpenAPI.TOKEN = response.token.access_token
+    await router.push('/')
+  }
 })
 </script>
 
@@ -36,9 +51,9 @@ const onSubmit = form.handleSubmit((values) => {
         {{ $t('auth.logIn.button') }}
       </Button>
     </form>
-    <Link href="/recover-password" class="recover-password-link">{{
+    <RouterLink to="/auth/recover-password" class="recover-password-link">{{
       $t('auth.recoverPassword.header')
-    }}</Link>
+    }}</RouterLink>
   </div>
 </template>
 

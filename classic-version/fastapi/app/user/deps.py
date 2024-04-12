@@ -5,17 +5,17 @@ from fastapi import Depends
 from app.auth.deps import AnnotatedCurrentUserDep
 from app.common.deps.authz import AnnotatedFGAClientDep
 from app.common.deps.db import SessionDep
-from app.common.exceptions import ForbiddenException, NotFoundException
+from app.common.exceptions import ForbiddenException
 from app.user.fga import UserFGA
 from app.user.repository import UserRepo
 
 
-async def check_user_exists(
-    user_id: int, *, session: SessionDep
-) -> None:
+async def check_user_exists(user_id: int, *, session: SessionDep) -> None:
     await UserRepo.get(session, user_id)
 
+
 UserExists = Depends(check_user_exists)
+
 
 async def check_can_update_user(
     user_id: int, *, user: AnnotatedCurrentUserDep, fga_client: AnnotatedFGAClientDep

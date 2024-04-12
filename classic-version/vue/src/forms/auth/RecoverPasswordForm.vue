@@ -1,13 +1,34 @@
 <script setup lang="ts">
 import { vAutoAnimate } from '@formkit/auto-animate/vue'
 import { Button } from '@/components/ui/button'
-import { router } from '@inertiajs/vue3'
 import { useRecoverPasswordForm } from '@/forms/auth/composables/useRecoverPasswordForm'
 import EmailField from '@/forms/components/EmailField.vue'
+import { ApiError, LoginService } from '@/api'
+import { useToast } from '@/components/ui/toast'
+import { useI18n } from 'vue-i18n'
 const { form, isFormComplete } = useRecoverPasswordForm()
 
-const onSubmit = form.handleSubmit((values) => {
-  router.post(`/api/recover-password/${values.email}`)
+const { t } = useI18n()
+const { toast } = useToast()
+
+const onSubmit = form.handleSubmit(async (values) => {
+  try {
+    await LoginService.sendRecoverPasswordEmailApiRecoverPasswordEmailPost({
+      email: values.email
+    })
+    toast({
+      title: t('auth.success.recoveryEmail')
+    })
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const errorBody = error.body as Record<string, string>
+      toast({
+        title: t(`serverMessages.${errorBody.message}`),
+        variant: 'destructive',
+        duration: 3000
+      })
+    }
+  }
 })
 </script>
 

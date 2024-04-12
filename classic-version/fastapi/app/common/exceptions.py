@@ -5,8 +5,6 @@ from fastapi import status
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from starlette.responses import RedirectResponse
-
 
 
 class ErrorEvents(Enum):
@@ -54,20 +52,6 @@ async def common_error_handler(
         status_code=exc.status_code,
         content={"message": exc.message, "ids": exc.ids},
     )
-
-
-async def invalid_token_handler(
-    *args, **kwargs
-) -> RedirectResponse:
-    return RedirectResponse('/login')
-
-
-async def already_logged_in_handler(
-    *args, **kwargs
-) -> RedirectResponse:
-    return RedirectResponse('/app')
-
-
 
 
 class NotFoundException(CommonDetailedException):

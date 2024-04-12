@@ -1,38 +1,22 @@
 from datetime import datetime
-from typing import Annotated, Optional, Union, cast
+from typing import Annotated, cast
 
-from fastapi import Depends, Request
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordBearer as OAuth2PasswordBearer_
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.auth.exceptions import AlreadyLoggedInException, InvalidTokenException
+from app.auth.exceptions import InvalidTokenException
 from app.auth.models import AdminToken
 from app.auth.utils.auth import get_token_content
 from app.common.deps.db import SessionDep
 from app.common.exceptions import NotFoundException
-from app.user.models import User, UserOut
+from app.user.models import User
 from app.user.repository import UserRepo
 
-
-class OAuth2PasswordBearer(OAuth2PasswordBearer_):
-    def __init__(
-        self,
-        token_url: str,
-    ) -> None:
-        super().__init__(
-            tokenUrl=token_url,
-        )
-
-    async def __call__(self, request: Request) -> Union[str, None]:
-        token = request.cookies.get('token', None)
-        return token
-
-
-reusable_oauth2 = OAuth2PasswordBearer(token_url="/api/login")
-AnnotatedTokenDep = Annotated[Union[str, None], Depends(reusable_oauth2)]
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/login")
+AnnotatedTokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
 async def get_user_from_admin_token(
@@ -52,8 +36,6 @@ async def get_user_from_admin_token(
 
 
 async def get_current_user(*, token: AnnotatedTokenDep, session: SessionDep) -> User:
-    if token is None:
-        raise InvalidTokenException()
     try:
         admin_user_overrides = await get_user_from_admin_token(session, token)
         if admin_user_overrides is not None:
@@ -75,22 +57,3 @@ async def get_current_user(*, token: AnnotatedTokenDep, session: SessionDep) -> 
 
 CurrentUserDep = Depends(get_current_user)
 AnnotatedCurrentUserDep = Annotated[User, CurrentUserDep]
-
-
-async def redirect_if_already_logged_in(*, token: AnnotatedTokenDep, session: SessionDep):
-    try:
-        await get_current_user(token=token, session=session)
-        raise AlreadyLoggedInException()
-    except InvalidTokenException:
-        pass
-
-RedirectIfAlreadyLoggedInDep = Depends(redirect_if_already_logged_in)
-
-
-async def get_current_user_or_none(*, token: AnnotatedTokenDep, session: SessionDep):
-    try:
-        return await get_current_user(token=token, session=session)
-    except InvalidTokenException:
-        return None
-
-AnnotatedCurrentUserOrNoneDep = Annotated[Union[User, None], Depends(get_current_user_or_none)]

@@ -1,28 +1,24 @@
 <script setup lang="ts">
 import ClientLayout from '@/layouts/ClientLayout.vue'
-import { Link } from '@inertiajs/vue3'
-import type { UserOut } from '@/api'
 import { Button } from '@/components/ui/button'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import { storeToRefs } from 'pinia'
 
-interface Props {
-  user?: UserOut
-}
-
-defineProps<Props>()
+const { isLoggedIn } = storeToRefs(useCurrentUserStore())
 </script>
 <template>
   <ClientLayout class="main">
     <template #header-top-right>
-      <Link v-if="user" href="/app">
+      <RouterLink v-if="isLoggedIn" to="/app">
         <Button variant="outline">
           {{ $t('goToApp') }}
         </Button>
-      </Link>
-      <Link v-else href="/login">
+      </RouterLink>
+      <RouterLink v-else to="/auth/login">
         <Button variant="outline">
           {{ $t('auth.logIn.header') }}
         </Button>
-      </Link>
+      </RouterLink>
     </template>
     <h1>Hello World (unprotected)</h1>
   </ClientLayout>

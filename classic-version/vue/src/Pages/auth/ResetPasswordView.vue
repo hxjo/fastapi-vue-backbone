@@ -1,31 +1,31 @@
 <script setup lang="ts">
 import ClientLayout from '@/layouts/ClientLayout.vue'
-import { Link } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
-import { computed } from 'vue'
-import type { MessageProps } from '@/messageProps'
-import { useServerMessages } from '@/composables/useServerMessages'
 import ResetPasswordForm from '@/forms/auth/ResetPasswordForm.vue'
-interface Props extends MessageProps {
-  email?: string
-  token: string
-}
-const props = defineProps<Props>()
+import { OpenAPI, type UserOut, UsersService } from '@/api'
+import { useRoute } from 'vue-router'
+import { onMounted, ref } from 'vue'
 
-const message = computed(() => props.message)
-useServerMessages(message)
+const route = useRoute()
+const token = route.query.token as string
+OpenAPI.TOKEN = token
+const user = ref<UserOut | null>()
+
+onMounted(async () => {
+  user.value = await UsersService.getUserMeApiV1UsersMeGet()
+})
 </script>
 
 <template>
   <ClientLayout class="main">
     <template #header-top-right>
-      <Link href="/login">
+      <RouterLink to="/login">
         <Button variant="outline">
           {{ $t('auth.logIn.header') }}
         </Button>
-      </Link>
+      </RouterLink>
     </template>
-    <ResetPasswordForm v-if="email" :email="email" :token="token" />
+    <ResetPasswordForm v-if="user?.email" :email="user.email" :token="token" />
     <h2 v-else>{{ $t('auth.errors.invalidToken') }}</h2>
   </ClientLayout>
 </template>
