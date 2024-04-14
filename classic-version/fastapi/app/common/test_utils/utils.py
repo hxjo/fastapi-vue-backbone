@@ -45,7 +45,7 @@ def authenticate_client(
             minutes=expires_minutes if expires_minutes is not None else 30
         ),
     )
-    client.cookies.update({"token": token})
+    client.headers.update({"Authorization": f"Bearer {token}"})
 
 
 def get_route(function: Callable[..., Any], **kwargs: Any) -> str:

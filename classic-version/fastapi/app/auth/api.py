@@ -27,7 +27,7 @@ async def api_login(
     )
     user = await UserRepo.get_by_email(session, email=form_data.username)
     return UserAndToken(
-        user=UserOut.from_orm(user),
+        user=UserOut.model_validate(user),
         token=token,
     )
 

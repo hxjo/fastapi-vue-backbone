@@ -26,11 +26,11 @@ class TestUserRoutes:
             "password": "strong@Sass139",
         }
         response = await client.post(get_route(create_user), json=payload)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/app"
-        set_cookie = response.headers["set-cookie"]
-        token = set_cookie.split(";")[0].split("=")[1]
-        assert token is not None
+        assert response.status_code == status.HTTP_201_CREATED
+        content = response.json()
+        assert content["user"] is not None
+        assert content["token"] is not None
+        assert content["token"]["access_token"] is not None
         user = await UserRepo.get_by_email(session, email=payload["email"])
         assert user.username == payload["username"]
         assert user.is_active is True
@@ -59,10 +59,8 @@ class TestUserRoutes:
         response = await client.patch(
             get_route(update_user, user_id=user.id),
             json=payload,
-            headers={"Referer": "/app"},
         )
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/app"
+        assert response.status_code == status.HTTP_201_CREATED
         assert verify_password_against_hash(new_password, user.hashed_password)
 
     async def test_delete_user_endpoint(self, session, factory, client):
@@ -116,13 +114,10 @@ class TestUserRouteErrors:
 
         response = await client.post(get_route(create_user), json=payload)
 
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        error = response.headers["set-cookie"].split(";")[0].split("=")[1]
-        assert error == "user.conflict.email_already_registered"
+        assert response.status_code == status.HTTP_409_CONFLICT
+
 
     async def test_cannot_create_user_with_unsecure_password(self, client):
-        # Most of the tests are in the service (app.services.user.tests.test_password), we're only
-        # testing the response here
         payload = {
             "username": "username",
             "email": "u@gmail.com",
@@ -131,9 +126,7 @@ class TestUserRouteErrors:
 
         response = await client.post(get_route(create_user), json=payload)
 
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        error = response.headers["set-cookie"].split(";")[0].split("=")[1]
-        assert error == "auth.invalid.password_not_strong"
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     async def test_cannot_patch_user_with_unsecure_password(self, client, factory):
         user = await factory(User)
@@ -145,9 +138,7 @@ class TestUserRouteErrors:
         response = await client.patch(
             get_route(update_user, user_id=user.id), json=payload
         )
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        error = response.headers["set-cookie"].split(";")[0].split("=")[1]
-        assert error == "auth.invalid.password_not_strong"
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     async def test_cannot_create_user_with_invalid_email(self, client):
         payload = {
@@ -193,7 +184,7 @@ class TestUserRouteErrors:
         }
 
         response = await client.post(get_route(create_user), json=payload)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert response.status_code == status.HTTP_201_CREATED
         email = payload["email"]
         user = await UserRepo.get_by_email(session, email=email)
         assert user.is_superuser is False
@@ -208,7 +199,7 @@ class TestUserRouteErrors:
         response = await client.patch(
             get_route(update_user, user_id=user.id), json=payload
         )
-        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert response.status_code == status.HTTP_201_CREATED
         assert user.is_superuser is False
 
 
@@ -222,7 +213,7 @@ class TestUserRouteBackgroundTasks:
             "password": "StrongPassw0rd!",
         }
         response = await client.post(get_route(create_user), json=payload)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert response.status_code == status.HTTP_201_CREATED
         user = await UserRepo.get_by_email(session, email=payload["email"])
         user_id = user.id
         background_tasks.add_task.assert_any_call(
@@ -255,7 +246,7 @@ class TestUserRouteBackgroundTasks:
         response = await client.patch(
             get_route(update_user, user_id=user.id), json={"username": "new username"}
         )
-        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert response.status_code == status.HTTP_201_CREATED
         background_tasks.add_task.assert_any_call(
             search_clients.user.update_documents, [user]
         )
@@ -265,8 +256,7 @@ class TestUserRoutePermissions:
     async def test_cannot_read_user_without_authentication(self, factory, client):
         user = await factory(User)
         response = await client.get(get_route(get_user_by_id, user_id=user.id))
-        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-        assert response.headers["location"] == "/login"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     async def test_cannot_patch_other_user(self, factory, client):
         user = await factory(User)
@@ -291,5 +281,4 @@ class TestUserRoutePermissions:
 
     async def test_cannot_search_users_without_being_authenticated(self, client):
         response = await client.get(get_route(search_users))
-        assert response.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-        assert response.headers["location"] == "/login"
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

@@ -22,7 +22,7 @@ router = APIRouter()
 )
 async def create_user(_user: UserCreate, *, deps: AnnotatedCommonDep):
     user = await UserRepo.create(deps, obj_in=_user)
-    user_out = UserOut.from_orm(user)
+    user_out = UserOut.model_validate(user)
     token = await UserRepo.authenticate(
         deps.session, email=user.email, password=_user.password
     )
