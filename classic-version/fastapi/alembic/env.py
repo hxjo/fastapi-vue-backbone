@@ -5,8 +5,8 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from alembic import context
-import app.user.models  # noqa
-import app.auth.models  # noqa
+from commands.utils import import_all_models
+import_all_models()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

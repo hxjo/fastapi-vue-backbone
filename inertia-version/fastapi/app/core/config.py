@@ -3,7 +3,6 @@ from typing import Any, List, Optional, Union
 
 from dotenv import load_dotenv
 from pydantic import (
-    AnyHttpUrl,
     EmailStr,
     PostgresDsn,
     ValidationInfo,
@@ -25,10 +24,11 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ALGORITHM: str = "HS256"
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: List[Any] = ["*"]
     DEBUG_SQL: bool = False
     SKIP_TEST_DB_SETUP: bool = False
     SERVER_HOST: str = "http://127.0.0.1:8000"
+    FRONTEND_HOST: str = "http://127.0.0.1:5173"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -150,9 +150,6 @@ class Settings(BaseSettings):
     FGA_API_SCHEME: str = "http"
     FGA_API_HOST: str = "localhost"
     FGA_API_PORT: int = 8080
-    FGA_STORE_ID: str = ""
-    FGA_AUTHN_PRESHARED_KEY: str = ""
-    FGA_MODEL_ID: str = ""
 
     @field_validator("FGA_API_PORT", mode="before")
     @classmethod

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.common.deps.authz import get_fga_client
+from app.common.deps.fga import get_fga_client
 from app.common.deps.db import get_db
 from app.common.deps.search import StructuredSearchClient, get_search_clients
 from app.common.deps.tasks import tasks

@@ -1,49 +1,10 @@
-[tool.poetry]
-package-mode = false
-name = "backbone"
-
-[tool.poetry.dependencies]
-python = ">=3.10, <=3.13"
-poethepoet = "^0.23.0"
-python-dotenv = "^1.0.0"
-fastapi = "^0.103.2"
-uvicorn = { extras = ["standard"], version = "^0.23.2" }
-sqlalchemy = "^2.0.21"
-alembic = "^1.12.0"
-httpx = "^0.25.0"
-bcrypt = "^4.0.1"
-python-multipart = "^0.0.6"
-python-jose = "^3.3.0"
-sqladmin = "^0.16.0"
-greenlet = "^3.0.3"
-itsdangerous = "^2.1.2"
-typer = { extras = ["all"], version = "^0.9.0" }
-minio = "^7.2.3"
-fastapi-storages = { extras = ["all"], version = "^0.2.1" }
-sqlmodel = "^0.0.14"
-pydantic-settings = "^2.1.0"
-pydantic = { extras = ["email"], version = "^2.5.3" }
-emails = "^0.6"
-meilisearch = "^0.30.0"
-openfga-sdk = "^0.4.1"
-pytest-asyncio = "^0.23.5"
-asyncpg = "^0.29.0"
-ujson = "^5.9.0"
-psycopg2-binary = "^2.9.9"
-types-python-jose = "^3.3.4.20240106"
-
-[tool.poetry.group.lint.dependencies]
-mypy = "^1.8.0"
-ruff = "^0.3.2"
-
-[tool.poetry.group.test.dependencies]
-pytest-asyncio = "^0.23.3"
-pytest = "^7.4.2"
-pytest-xdist = "^3.5.0"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backbone"
+version = "0.1.0"
 
 [tool.mypy]
 strict = true
@@ -64,18 +25,16 @@ exclude = [
     disable_error_code = ["misc", "no-untyped-def"]  # Untyped decorator makes function "index" untyped + above
 
 [tool.poe.tasks]
-run_services = "python3 -m commands.docker up"
-run = ["run_services", "runapp"]
+up_services = "python3 -m commands.docker up"
+
 runall = "python3 -m commands.docker upall"
-rundc = "poe runapp --host 0.0.0.0"
 
 migration = { cmd = "alembic revision --autogenerate -m", help = "Create a new migration. Expects a message argument" }
 migrate = "alembic upgrade head"
 rollback = "alembic downgrade -1"
 shell = "python3 -i -m commands.shell"
 
-
-mypy = 'mypy app/'
+mypy = "mypy --config-file mypy.ini app/"
 ruff_lint_check = "ruff check ."
 
 format = "ruff format ."
@@ -83,44 +42,61 @@ lint = "ruff check . --fix"
 format_check = "ruff format . --check"
 lint_check = ["mypy", "ruff_lint_check"]
 ci_check = ["format_check", "lint_check"]
-pc = ["format", "lint", "mypy"]
+pc = ["format", "lint", "ci_check"]  # Pre-commit hook
+git_add = "git add -A"
+cm = ["format", "lint", "git_add"]
 
+[tool.poe.tasks.run]
+cmd = "python3 -m commands.run --host $host --port $port"
+
+
+  [tool.poe.tasks.run.args.host]
+  help = "The host to run the app on"
+  default = "0.0.0.0"
+  options = ["-h", "--host"]
+
+  [tool.poe.tasks.run.args.port]
+  help = "The port to run the app on"
+  default = 8000
+  options = ["-p", "--port"]
 
 [tool.poe.tasks.runapp]
 cmd = "uvicorn app.main:app --reload --host $host --port $port"
 
-    [tool.poe.tasks.runapp.args.host]
-    help = "Host on which to run the service"
-    default = "127.0.0.1"
+  [tool.poe.tasks.runapp.args.host]
+  help = "The host to run the app on"
+  default = "0.0.0.0"
+  options = ["-h", "--host"]
 
-    [tool.poe.tasks.runapp.args.port]
-    help = "Port on which to run the service"
-    default = "8000"
+  [tool.poe.tasks.runapp.args.port]
+  help = "The port to run the app on"
+  default = "8000"
+  options = ["-p", "--port"]
 
 [tool.poe.tasks.test]
 cmd = "pytest -n $num_workers app/$target"
 
-    [tool.poe.tasks.test.args.num_workers]
-    help = "Number of workers to use for parallel testing"
-    default = "auto"
-    options = ["-n", "--num-workers"]
+  [tool.poe.tasks.test.args.num_workers]
+  help = "Number of workers to use for parallel testing"
+  default = "auto"
+  options = ["-n", "--num-workers"]
 
 
-    [tool.poe.tasks.test.args.target]
-    help = "The target to run tests on, from app/"
-    positional = true
-    default = ""
+  [tool.poe.tasks.test.args.target]
+  help = "The target to run tests on, from app/"
+  positional = true
+  default = ""
 
 [tool.poe.tasks.cmd]
 cmd = "python3 -m commands.$command $subcommand"
 help = "Run a command. Pass --help for more information. Default command is main, the interactive menu"
 
-    [tool.poe.tasks.cmd.args.command]
-    help = "The command to run. Options are: main, docker, admin, data, search"
-    positional = true
-    default = "main"
+  [tool.poe.tasks.cmd.args.command]
+  help = "The command to run. Options are: main, docker, admin, data, search"
+  positional = true
+  default = "main"
 
-    [tool.poe.tasks.cmd.args.subcommand]
-    help = "The subcommand to run. Pass `-- --help` for more information"
-    positional = true
-    default = ""
+  [tool.poe.tasks.cmd.args.subcommand]
+  help = "The subcommand to run. Pass `-- --help` for more information"
+  positional = true
+  default = ""

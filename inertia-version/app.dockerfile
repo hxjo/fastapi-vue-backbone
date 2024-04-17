@@ -1,16 +1,17 @@
 FROM node:18
 
-ENV POETRY_VENV=/srv/fastapi/.venv
+ENV UV_VENV=/srv/fastapi/.venv
+SHELL ["/bin/bash", "-c"]
 
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 python3-pip gcc build-essential libssl-dev libffi-dev git openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Add Poetry to PATH
-ENV PATH="/root/.local/bin:$PATH"
+# Source the cargo env
+ENV PATH="/root/.cargo/bin:$PATH"
 
 # Set the working directory
 WORKDIR /srv/vue
@@ -27,12 +28,13 @@ COPY ./vue .
 
 WORKDIR /srv/fastapi
 
-COPY fastapi/pyproject.toml poetry.lock* ./
+COPY fastapi/pyproject.toml ./
+COPY fastapi/requirements* ./
 
-RUN poetry config virtualenvs.in-project true
-RUN poetry install --no-interaction
+RUN uv venv
+ENV PATH="$UV_VENV/bin:$PATH"
+RUN uv pip install -r requirements.dev.in
 
-ENV PATH="$POETRY_VENV/bin:$PATH"
 
 COPY ./fastapi .
 
@@ -43,5 +45,5 @@ RUN chmod +x /srv/start
 EXPOSE 8000
 EXPOSE 5173
 
-ENTRYPOINT ["/bin/bash", "-c", "source $POETRY_VENV/bin/activate && exec /srv/start"]
+ENTRYPOINT ["/bin/bash", "-c", "source $UV_VENV/bin/activate && exec /srv/start"]
 

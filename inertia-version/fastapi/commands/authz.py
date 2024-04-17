@@ -23,46 +23,44 @@ FGA_AUTHZ_MODEL = os.path.join(AUTHORIZATION_FOLDER, "model.fga")
 FGA_AUTHZ_STORE = os.path.join(AUTHORIZATION_FOLDER, "store.fga.yaml")
 JSON_AUTHZ_MODEL = os.path.join(AUTHORIZATION_FOLDER, "model.json")
 
-fga_client_configuration = ClientConfiguration(
-    api_scheme=settings.FGA_API_SCHEME,
-    api_host=f"{settings.FGA_API_HOST}:{settings.FGA_API_PORT}",
-    store_id=settings.FGA_STORE_ID,
-    authorization_model_id=settings.FGA_MODEL_ID,
-)
+AUTHORIZATION_MODEL_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', 'app', '.fga_authorization_model_id')
+STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', 'app', '.fga_store_id')
 
 
-def write_to_dotenv(key: str, value: str):
-    key_exists = False
-    try:
-        with open(ENV_FILE, "r", encoding="utf-8") as file:
-            lines = file.readlines()
-            for index, line in enumerate(lines):
-                if line.startswith(key):
-                    key_exists = True
-                    lines[index] = f"{key}={value}\n"
-                    break
-    except FileNotFoundError:
-        lines = []
 
-    if not key_exists:
-        lines.append(f"\n{key}={value}\n")
+def get_fga_client_config():
+    if not os.path.isfile(AUTHORIZATION_MODEL_ID_FILE):
+        with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
+            file.write("")
+    if not os.path.isfile(STORE_ID_FILE):
+        with open(STORE_ID_FILE, "w", encoding="utf-8") as file:
+            file.write("")
 
-    with open(ENV_FILE, "w", encoding="utf-8") as file:
-        file.writelines(lines)
+    authorization_model_id =  open(AUTHORIZATION_MODEL_ID_FILE).read().strip()
+    store_id = open(STORE_ID_FILE).read().strip()
+
+    return ClientConfiguration(
+        api_scheme=settings.FGA_API_SCHEME,
+        api_host=f"{settings.FGA_API_HOST}:{settings.FGA_API_PORT}",
+        store_id=store_id,
+        authorization_model_id=authorization_model_id,
+    )
+
+
 
 
 @app.command()
 def setup_store():
-    with OpenFgaClient(fga_client_configuration) as client:
+    config = get_fga_client_config()
+    with OpenFgaClient(config) as client:
         create_store_request = CreateStoreRequest(
             name="skeleton",
         )
         response = client.create_store(create_store_request)
         print_success("Store created successfully")
-
-        write_to_dotenv("FGA_STORE_ID", response.id)
-
-        print_success("Your .env file has been updated")
+        with open(STORE_ID_FILE, "w", encoding="utf-8") as file:
+            file.write(response.id)
+        print_success("Your store_id file has been updated")
 
 
 @app.command()
@@ -100,21 +98,30 @@ def model_to_json():
 @app.command()
 def write_authorization_model():
     load_dotenv(override=True)
-    store_id = os.getenv("FGA_STORE_ID")
-    if store_id is None:
+    with open(STORE_ID_FILE, "r", encoding="utf-8") as file:
+        store_id = file.read().strip()
+    if store_id == "":
         print_error("Store ID is not set")
         return
     with open(JSON_AUTHZ_MODEL, "r", encoding="utf-8") as model:
         model_json = json.load(model)
-        with OpenFgaClient(fga_client_configuration) as client:
+        config = get_fga_client_config()
+        with OpenFgaClient(config) as client:
             client.set_store_id(store_id)
             response = client.write_authorization_model(model_json)
             print_success("Authorization model written successfully")
+            with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
+                file.write(response.authorization_model_id)
+                
+            print_success("Your authorization file has been updated")
 
-            write_to_dotenv("FGA_MODEL_ID", response.authorization_model_id)
 
-            print_success("Your .env file has been updated")
 
+def is_first_time():
+    config = get_fga_client_config()
+    with OpenFgaClient(config) as client:
+        existing_stores_res = client.list_stores()
+        return len(existing_stores_res.stores) == 0
 
 @app.command()
 def setup():

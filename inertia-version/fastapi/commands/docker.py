@@ -11,9 +11,13 @@ from .options import Option, handle_options
 from .print import print_default, print_error, print_info, print_success
 
 ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
-PROJECT_NAME = os.path.basename(os.getcwd())
+docker_compose_file = os.path.join(ABSOLUTE_PATH, "..", "..", "docker-compose.yml")
+docker_compose_local_file = os.path.join(ABSOLUTE_PATH, "..", "..", "docker-compose.local.yml")
 
-DOCKER_COMPOSE_FILE = os.path.join(ABSOLUTE_PATH, "..", "..", "docker-compose.yml")
+if os.path.isfile(docker_compose_local_file):
+    DOCKER_COMPOSE_FILE = docker_compose_local_file
+else:
+    DOCKER_COMPOSE_FILE = docker_compose_file
 
 
 load_dotenv()
@@ -27,7 +31,7 @@ def exec_app(service: str, *, tty: bool = False) -> List[str]:
     process = ["docker", "exec"]
     if tty:
         process.append("-it")
-    process.append(f"{PROJECT_NAME}-{service}-1")
+    process.append(f"dine-in-vr-back-{service}-1")
 
     return process
 
@@ -51,6 +55,7 @@ def up():
                 "mailhog",
                 "meilisearch",
                 "openfga",
+                "openfga_db",
                 "-d",
             ],
             check=True,
@@ -95,11 +100,11 @@ def stop():
 
 
 @app.command()
-def wipe():
+def wipe(yes: bool = False):
     """
     Wipe the application
     """
-    if Confirm.ask("Are you sure you want to wipe the application ?"):
+    if yes or Confirm.ask("Are you sure you want to wipe the application ?"):
         try:
             subprocess.run(
                 [
@@ -158,18 +163,18 @@ def recreate_db():
             [*exec_app_cmd, "createdb", "-U", postgres_user, postgres_db], check=True
         )
         print_success("Database recreated")
-        init_db()
+        migrate_db()
     except subprocess.CalledProcessError:
         print_error("An error occurred while recreating the database")
         time.sleep(2)
 
 
 @app.command()
-def init_db():
+def migrate_db():
     """
     Initialize the database: Migration + Seed
     """
-    print_info("Initializing the database...")
+    print_info("Migating the database...")
     try:
         subprocess.run(["poe", "migrate"], check=True)
         print_success("Database migrated successfully!")
@@ -178,8 +183,6 @@ def init_db():
         time.sleep(2)
         raise exc
 
-    print_success("Database migrated and seeded successfully!")
-
 
 @app.command()
 def first_setup():
@@ -187,7 +190,7 @@ def first_setup():
     First setup: Up + Init DB
     """
     up()
-    init_db()
+    migrate_db()
 
 
 @app.command()
@@ -208,7 +211,7 @@ def i(allow_back: bool = False):
             Option(
                 index=5,
                 description="Initialize the database (migrate + seed) 🌱",
-                func=init_db,
+                func=migrate_db,
             ),
             Option(
                 index=6,

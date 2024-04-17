@@ -150,9 +150,6 @@ class Settings(BaseSettings):
     FGA_API_SCHEME: str = "http"
     FGA_API_HOST: str = "localhost"
     FGA_API_PORT: int = 8080
-    FGA_STORE_ID: str = ""
-    FGA_AUTHN_PRESHARED_KEY: str = ""
-    FGA_MODEL_ID: str = ""
 
     @field_validator("FGA_API_PORT", mode="before")
     @classmethod

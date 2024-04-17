@@ -164,4 +164,5 @@ cython_debug/
 !extensions.json
 .DS_Store
 
-poetry.lock
+.fga_authorization_model_id
+.fga_store_id

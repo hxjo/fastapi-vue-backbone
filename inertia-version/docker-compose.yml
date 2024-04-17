@@ -29,7 +29,7 @@ services:
       - ./vue:/srv/vue
       - node_modules:/srv/vue/node_modules
       - /dev/null:/srv/vue/package-lock.json
-      - venv:/srv/fastapi/.venv
+#      - venv:/srv/fastapi/.venv
     ports:
       - published: ${FASTAPI_PORT:-8000}
         target: 8000

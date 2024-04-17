@@ -3,7 +3,7 @@ from typing import cast
 from fastapi import Depends
 
 from app.auth.deps import AnnotatedCurrentUserDep
-from app.common.deps.authz import AnnotatedFGAClientDep
+from app.common.deps.fga import AnnotatedFGAClientDep
 from app.common.deps.db import SessionDep
 from app.common.exceptions import ForbiddenException
 from app.user.fga import UserFGA

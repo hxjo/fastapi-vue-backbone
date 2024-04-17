@@ -14,13 +14,12 @@ JSON_AUTHZ_MODEL = os.path.join(
 
 
 async def get_client_configuration(
-    store_id: Optional[str] = None, authorization_model_id: Optional[str] = None
+    store_id: Optional[str] = None
 ) -> ClientConfiguration:
     return ClientConfiguration(
         api_scheme=settings.FGA_API_SCHEME,
         api_host=f"{settings.FGA_API_HOST}:{settings.FGA_API_PORT}",
         store_id=store_id,
-        authorization_model_id=authorization_model_id or settings.FGA_MODEL_ID,
     )
 
 

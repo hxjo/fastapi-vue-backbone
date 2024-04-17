@@ -28,3 +28,4 @@ class Token(BaseModel):
 class NewPassword(BaseModel):
     token: str
     password: str
+

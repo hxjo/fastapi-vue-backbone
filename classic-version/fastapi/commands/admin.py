@@ -9,7 +9,7 @@ from app.auth.utils.auth import get_password_hash
 from app.user.models import User
 from app.user.fga import UserFGA
 
-from .authz import fga_client_configuration
+from .authz import get_fga_client_config
 from openfga_sdk import OpenFgaClient
 from .options import Option, handle_options
 from .print import print_error, print_info, print_success
@@ -45,7 +45,8 @@ async def async_create_superuser():
     session.add(user)
     session.commit()
     print_success(f"Superuser created successfully with id {user.id}")
-    async with OpenFgaClient(fga_client_configuration) as fga_client:
+    config = get_fga_client_config()
+    async with OpenFgaClient(config) as fga_client:
         await UserFGA.create_relationships(fga_client, user.id, "superuser")
 
 
@@ -84,7 +85,8 @@ async def async_set_superuser() -> None:
             user.is_superuser = True
             session.commit()
             print_success("User is now a superuser")
-    async with OpenFgaClient(fga_client_configuration) as fga_client:
+    config = get_fga_client_config()
+    async with OpenFgaClient(config) as fga_client:
         await UserFGA.create_relationships(fga_client, user.id, "superuser")
 
 
