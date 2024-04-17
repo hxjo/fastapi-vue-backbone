@@ -12,7 +12,9 @@ from .print import print_default, print_error, print_info, print_success
 
 ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
 docker_compose_file = os.path.join(ABSOLUTE_PATH, "..", "..", "docker-compose.yml")
-docker_compose_local_file = os.path.join(ABSOLUTE_PATH, "..", "..", "docker-compose.local.yml")
+docker_compose_local_file = os.path.join(
+    ABSOLUTE_PATH, "..", "..", "docker-compose.local.yml"
+)
 
 if os.path.isfile(docker_compose_local_file):
     DOCKER_COMPOSE_FILE = docker_compose_local_file

@@ -10,9 +10,7 @@ from commands.print import print_success, print_warning
 
 import_all_models()
 
-index_model_map = {
-    UserSearch.index_name: User
-}
+index_model_map = {UserSearch.index_name: User}
 
 index_name_search_map = {
     UserSearch.index_name: UserSearch,

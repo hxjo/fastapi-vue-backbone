@@ -34,7 +34,7 @@ migrate = "alembic upgrade head"
 rollback = "alembic downgrade -1"
 shell = "python3 -i -m commands.shell"
 
-mypy = "mypy --config-file mypy.ini app/"
+mypy = "mypy app/"
 ruff_lint_check = "ruff check ."
 
 format = "ruff format ."

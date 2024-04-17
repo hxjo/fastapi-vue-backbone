@@ -26,9 +26,11 @@ def run(up_services: bool = True, host: str = "0.0.0.0", port: int = 8000):
     print_success("Update complete!")
 
     print_info("Running the app...")
-    app_port = os.getenv('FASTAPI_PORT', str(port))
-    app_host = os.getenv('FASTAPI_HOST', host)
-    subprocess.run(["poe", "runapp", "--host", app_host,  "--port", app_port], check=True)
+    app_port = os.getenv("FASTAPI_PORT", str(port))
+    app_host = os.getenv("FASTAPI_HOST", host)
+    subprocess.run(
+        ["poe", "runapp", "--host", app_host, "--port", app_port], check=True
+    )
 
 
 if __name__ == "__main__":

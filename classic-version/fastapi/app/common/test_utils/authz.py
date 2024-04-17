@@ -14,7 +14,7 @@ JSON_AUTHZ_MODEL = os.path.join(
 
 
 async def get_client_configuration(
-    store_id: Optional[str] = None
+    store_id: Optional[str] = None,
 ) -> ClientConfiguration:
     return ClientConfiguration(
         api_scheme=settings.FGA_API_SCHEME,

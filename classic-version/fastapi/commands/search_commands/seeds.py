@@ -9,9 +9,7 @@ from commands.print import print_info, print_success
 
 import_all_models()
 
-search_model_map = {
-    UserSearch.index_name: User
-}
+search_model_map = {UserSearch.index_name: User}
 
 
 def seed_search_index(search_class):

@@ -6,6 +6,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from commands.utils import import_all_models
+
 import_all_models()
 
 # this is the Alembic Config object, which provides

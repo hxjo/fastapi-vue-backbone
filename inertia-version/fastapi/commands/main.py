@@ -10,6 +10,7 @@ from app.core.config import settings
 
 ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
 
+
 def update_openapi():
     # Url to fetch:
     typer.echo("Updating OpenAPI docs...")
@@ -22,6 +23,7 @@ def update_openapi():
             f.write(openapi)
 
     typer.echo("Done!")
+
 
 def i():
     common_func_args = {"allow_back": True}
@@ -49,7 +51,7 @@ def i():
                 index=4,
                 description="Update OpenAPI docs",
                 func=update_openapi,
-            )
+            ),
         ],
         allow_back=False,
     )

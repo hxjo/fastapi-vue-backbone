@@ -6,10 +6,13 @@ from openfga_sdk import ClientConfiguration, OpenFgaClient
 from app.core.config import settings
 
 ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
-AUTHORIZATION_MODEL_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', '..', '.fga_authorization_model_id')
-STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', '..', '.fga_store_id')
+AUTHORIZATION_MODEL_ID_FILE = os.path.join(
+    ABSOLUTE_PATH, "..", "..", ".fga_authorization_model_id"
+)
+STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, "..", "..", ".fga_store_id")
 
-def get_fga_config():
+
+def get_fga_config() -> ClientConfiguration:
     if not os.path.isfile(AUTHORIZATION_MODEL_ID_FILE):
         with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
             file.write("")
@@ -26,6 +29,7 @@ def get_fga_config():
         store_id=store_id,
         authorization_model_id=authorization_model_id,
     )
+
 
 async def get_fga_client() -> AsyncGenerator[OpenFgaClient, None]:
     config = get_fga_config()

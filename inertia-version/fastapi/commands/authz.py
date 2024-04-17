@@ -23,9 +23,10 @@ FGA_AUTHZ_MODEL = os.path.join(AUTHORIZATION_FOLDER, "model.fga")
 FGA_AUTHZ_STORE = os.path.join(AUTHORIZATION_FOLDER, "store.fga.yaml")
 JSON_AUTHZ_MODEL = os.path.join(AUTHORIZATION_FOLDER, "model.json")
 
-AUTHORIZATION_MODEL_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', 'app', '.fga_authorization_model_id')
-STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, '..', 'app', '.fga_store_id')
-
+AUTHORIZATION_MODEL_ID_FILE = os.path.join(
+    ABSOLUTE_PATH, "..", "app", ".fga_authorization_model_id"
+)
+STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, "..", "app", ".fga_store_id")
 
 
 def get_fga_client_config():
@@ -36,7 +37,7 @@ def get_fga_client_config():
         with open(STORE_ID_FILE, "w", encoding="utf-8") as file:
             file.write("")
 
-    authorization_model_id =  open(AUTHORIZATION_MODEL_ID_FILE).read().strip()
+    authorization_model_id = open(AUTHORIZATION_MODEL_ID_FILE).read().strip()
     store_id = open(STORE_ID_FILE).read().strip()
 
     return ClientConfiguration(
@@ -45,8 +46,6 @@ def get_fga_client_config():
         store_id=store_id,
         authorization_model_id=authorization_model_id,
     )
-
-
 
 
 @app.command()
@@ -112,9 +111,8 @@ def write_authorization_model():
             print_success("Authorization model written successfully")
             with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
                 file.write(response.authorization_model_id)
-                
-            print_success("Your authorization file has been updated")
 
+            print_success("Your authorization file has been updated")
 
 
 def is_first_time():
@@ -122,6 +120,7 @@ def is_first_time():
     with OpenFgaClient(config) as client:
         existing_stores_res = client.list_stores()
         return len(existing_stores_res.stores) == 0
+
 
 @app.command()
 def setup():

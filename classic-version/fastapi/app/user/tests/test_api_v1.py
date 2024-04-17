@@ -116,7 +116,6 @@ class TestUserRouteErrors:
 
         assert response.status_code == status.HTTP_409_CONFLICT
 
-
     async def test_cannot_create_user_with_unsecure_password(self, client):
         payload = {
             "username": "username",
