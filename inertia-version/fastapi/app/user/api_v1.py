@@ -1,15 +1,18 @@
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 from urllib.parse import urlparse
 
-from fastapi import APIRouter, Request, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from starlette.responses import RedirectResponse
 
 from app.auth.deps import AnnotatedCurrentUserDep, CurrentUserDep
-from app.auth.utils.auth import create_access_token
+from app.auth.utils.auth import add_token_to_response, create_access_token
 from app.common.deps.common import AnnotatedCommonDep
 from app.common.deps.db import SessionDep
+from app.common.deps.inertia import InertiaDep
 from app.common.deps.search import AnnotatedSearchClientsDep
 from app.core.config import settings
+from app.libs.inertia import InertiaRenderer
 from app.user.deps import (
     CurrentCanDeleteUser,
     CurrentCanReadUser,
@@ -29,32 +32,17 @@ router = APIRouter()
 @router.post(
     "/",
     status_code=201,
+    response_model=None
 )
-async def create_user(_user: UserCreate, *, deps: AnnotatedCommonDep):
+async def create_user(user: UserCreate, *, inertia: InertiaDep,  deps: AnnotatedCommonDep) -> RedirectResponse:
     try:
-        user = await UserRepo.create(deps, obj_in=_user)
-        token = create_access_token({"email": user.email})
+        user_ = await UserRepo.create(deps, obj_in=user)
         response = RedirectResponse(url="/app", status_code=303)
-        response.set_cookie(
-            key="token",
-            value=token,
-            httponly=True,
-            samesite=None,
-            secure=True,
-            expires=datetime.now(timezone.utc)
-            + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-        )
+        response = add_token_to_response(response, email=user_.email)
         return response
     except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
+        inertia.flash(exc.message, category="error")
         response = RedirectResponse(url="/signup", status_code=303)
-        response.set_cookie(
-            key="error",
-            value=exc.message,
-            httponly=True,
-            samesite=None,
-            secure=True,
-            expires=3,
-        )
         return response
 
 
@@ -97,7 +85,7 @@ async def get_user_by_id(
     dependencies=[CurrentCanUpdateUser],
 )
 async def update_user(
-    request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep
+    request: Request, user_id: int, user: UserUpdate, *, deps: AnnotatedCommonDep, inertia: InertiaDep
 ):
     referer = request.headers.get("Referer")
     parsed_referer_url = urlparse(referer)
@@ -105,23 +93,11 @@ async def update_user(
     response = RedirectResponse(url=str(request_from), status_code=303)
     try:
         await UserRepo.update(deps, id_=user_id, obj_in=user)
-        response.set_cookie(
-            key="message",
-            value="user.update_success",
-            httponly=True,
-            samesite=None,
-            secure=True,
-            expires=3,
-        )
+        inertia.flash("user.update_success", category="message")
+
     except (EmailAlreadyRegisteredException, PasswordNotStrongException) as exc:
-        response.set_cookie(
-            key="error",
-            value=exc.message,
-            httponly=True,
-            samesite=None,
-            secure=True,
-            expires=3,
-        )
+        inertia.flash(exc.message, category="error")
+
     return response
 
 

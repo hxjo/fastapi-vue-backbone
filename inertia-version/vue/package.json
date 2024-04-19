@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "devdc": "vite --host 0.0.0.0",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "run-p type-check \"build-only {@}\" \"build-only -- --ssr\" --",
+    "serve": "node dist/ssr/ssr.js",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:unit:nowatch": "vitest --no-watch",

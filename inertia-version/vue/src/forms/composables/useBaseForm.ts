@@ -22,10 +22,12 @@ export function useBaseForm<T extends z.ZodRawShape>(
       (Object.keys(form.errors.value) as Array<keyof typeof form.errors.value>).find(
         (key) => form.errors.value[key]
       ) !== undefined
+
     const hasMissingValues =
       (Object.keys(form.values) as Array<keyof typeof form.values>).find((key) => {
         return (
-          !(zodSchema instanceof z.ZodObject && zodSchema.shape[key] instanceof z.ZodOptional) &&
+          zodSchema instanceof z.ZodObject &&
+          !(zodSchema.shape[key] instanceof z.ZodOptional) &&
           (form.values[key] === '' || !form.values[key])
         )
       }) !== undefined

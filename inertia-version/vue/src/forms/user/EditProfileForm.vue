@@ -16,9 +16,9 @@ const props = defineProps<Props>()
 const { form, isFormComplete, hasFormChanged } = useEditProfileForm(props.user)
 
 const onSubmit = form.handleSubmit((values) => {
-  if (values.avatar) {
+  if (values.avatar_url && typeof values.avatar_url !== 'string') {
     const formData = new FormData()
-    formData.append('avatar', values.avatar)
+    formData.append('avatar', values.avatar_url)
     fetch(`/api/v1/users/${props.user.id}/avatar`, {
       method: 'POST',
       body: formData
@@ -27,7 +27,7 @@ const onSubmit = form.handleSubmit((values) => {
   const changedValues = Object.fromEntries(
     Object.entries(values).filter(([key, value]) => props.user[key as keyof UserOut] !== value)
   )
-  router.patch(`/api/v1/users/${props.user.id}`, { ...changedValues, avatar: undefined })
+  router.patch(`/api/v1/users/${props.user.id}`, { ...changedValues, avatar_url: undefined })
 })
 </script>
 
@@ -57,7 +57,7 @@ const onSubmit = form.handleSubmit((values) => {
     <InputField
       :is-field-dirty="() => true"
       :label="$t('user.editProfileModal.avatar')"
-      fieldName="avatar"
+      fieldName="avatar_url"
     />
     <Button type="submit" :disabled="!isFormComplete || !hasFormChanged">
       {{ $t('forms.save') }}

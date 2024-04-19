@@ -5,7 +5,7 @@ function isPasswordStrong(password: string): boolean {
   const hasUppercase = /[A-Z]/.test(password)
   const hasLowercase = /[a-z]/.test(password)
   const hasNumber = /\d/.test(password)
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>-_]/.test(password)
 
   return hasUppercase && hasLowercase && hasNumber && hasSpecialChar
 }
@@ -37,14 +37,18 @@ export function useFormField() {
     t('auth.errors.passwordStrength')
   )
   const passwordConfirmField = z.string()
+  function isAvatarUrl(avatar: any) {
+    return typeof avatar === 'string'
+  }
+
   const avatarField = z
     .any()
     .refine(
-      (file) => file?.size <= MAX_FILE_SIZE,
+      (file) => (isAvatarUrl(file) ? true : file?.size <= MAX_FILE_SIZE),
       t('forms.errors.maxFileSize', { maxFileSize: '5MB' })
     )
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+      (file) => (isAvatarUrl(file) ? true : ACCEPTED_IMAGE_TYPES.includes(file?.type)),
       t('forms.errors.acceptedImageTypes', {
         acceptedFileTypes: ACCEPTED_IMAGE_TYPES.map((type) => type.substring('image/'.length)).join(
           ','

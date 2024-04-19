@@ -2,18 +2,12 @@
 import ClientLayout from '@/layouts/ClientLayout.vue'
 import { Link } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
-import { computed } from 'vue'
-import type { MessageProps } from '@/messageProps'
-import { useServerMessages } from '@/composables/useServerMessages'
 import ResetPasswordForm from '@/forms/auth/ResetPasswordForm.vue'
-interface Props extends MessageProps {
+interface Props {
   email?: string
   token: string
 }
-const props = defineProps<Props>()
-
-const message = computed(() => props.message)
-useServerMessages(message)
+defineProps<Props>()
 </script>
 
 <template>

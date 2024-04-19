@@ -3,12 +3,17 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api_v1 import api_router_v1
 from app.auth.api import router as auth_router
 from app.auth.exceptions import AlreadyLoggedInException, InvalidTokenException
 from app.webapp.api import webapp_router
-from app.libs.inertia import InertiaMiddleware, settings as inertia_settings
+from app.libs.inertia import (
+    inertia_exception_handler,
+    InertiaVersionConflictException,
+    InertiaConfig,
+)
 from app.common.exceptions import (
     CommonDetailedException,
     already_logged_in_handler,
@@ -36,16 +41,8 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 
-inertia_assets_dir = (
-    os.path.join(os.path.dirname(__file__), "..", "..", "vue", "src")
-    if inertia_settings.INERTIA_ENV == "dev"
-    else os.path.join(os.path.dirname(__file__), "..", "..", "vue", "dist")
-)
+app.add_middleware(SessionMiddleware, secret_key="secret_key")
 
-
-app.add_middleware(InertiaMiddleware)
-
-app.mount("/src", StaticFiles(directory=inertia_assets_dir), name="static")
 
 app.include_router(auth_router, tags=["login"])
 app.include_router(webapp_router, include_in_schema=False)
@@ -56,3 +53,16 @@ create_admin(app)
 app.add_exception_handler(CommonDetailedException, common_error_handler)
 app.add_exception_handler(AlreadyLoggedInException, already_logged_in_handler)
 app.add_exception_handler(InvalidTokenException, invalid_token_handler)
+app.add_exception_handler(InertiaVersionConflictException, inertia_exception_handler)
+
+
+vue_dir = (
+    os.path.join(os.path.dirname(__file__), "..", "..", "vue", "dist", "client")
+    if InertiaConfig.environment != "development" or InertiaConfig.ssr_enabled is True
+    else os.path.join(os.path.dirname(__file__), "..", "..", "vue", "src")
+)
+
+app.mount("/src", StaticFiles(directory=vue_dir), name="src")
+app.mount(
+    "/assets", StaticFiles(directory=os.path.join(vue_dir, "assets")), name="assets"
+)

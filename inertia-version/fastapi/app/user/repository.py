@@ -39,6 +39,7 @@ class UserRepoClass(BaseRepo[User, UserCreate, UserUpdate]):
             deps.fga_client,
             user_id,
             cast(UserRole, user_role),
+            None
         )
         deps.tasks.add_task(deps.search.user.add_documents, [db_obj])
 

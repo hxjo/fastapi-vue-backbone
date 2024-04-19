@@ -1,7 +1,6 @@
-from typing import Union, Literal
+from typing import Literal
 
 from pydantic import BaseModel
-from app.user.models import UserOut
 
 
 class Message(BaseModel):
@@ -12,12 +11,3 @@ class Message(BaseModel):
 
 class MessageOut(BaseModel):
     message: Message
-
-
-class HomeOut(BaseModel):
-    user: Union[UserOut, None]
-
-
-class AppOut(BaseModel):
-    user: UserOut
-    message: Union[Message, None] = None

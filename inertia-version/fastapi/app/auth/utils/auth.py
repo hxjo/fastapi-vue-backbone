@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
-from typing import Any, Dict, cast
+from fastapi.responses import Response
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, TypeVar, Union, cast
 
 import bcrypt
 from jose import jwt
@@ -64,3 +65,19 @@ def verify_password_reset_token(token: str) -> str:
         return cast(str, decoded_token["email"])
     except JWTError as exc:
         raise InvalidTokenException() from exc
+
+
+ResponseType = TypeVar("ResponseType", bound=Response)
+
+
+def add_token_to_response(response: ResponseType, *, email: Union[str, None] = None, token: Union[str, None] = None) -> ResponseType:
+    token = create_access_token(data={"email": email}) if token is None else token
+    response.set_cookie(
+        key="token",
+        value=token,
+        httponly=True,
+        samesite=None,
+        secure=True,
+        expires=datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return response

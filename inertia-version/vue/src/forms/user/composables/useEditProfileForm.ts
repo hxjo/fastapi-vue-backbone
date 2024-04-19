@@ -10,12 +10,14 @@ export function useEditProfileForm(initialValues: UserOut) {
     username: minLenTextField,
     first_name: textField.optional(),
     last_name: textField.optional(),
-    avatar: avatarField.optional()
+    avatar_url: avatarField.optional()
   })
 
   const validInitialValues = {
     ...initialValues,
-    avatar_url: initialValues.avatar_url ?? ''
+    avatar_url: initialValues.avatar_url ?? '',
+    first_name: initialValues.first_name ?? '',
+    last_name: initialValues.last_name ?? ''
   }
 
   const { form, isFormComplete, hasFormChanged } = useBaseForm(zodSchema, validInitialValues)

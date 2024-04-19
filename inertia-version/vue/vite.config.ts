@@ -2,31 +2,27 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import tailwind from "tailwindcss"
-import autoprefixer from "autoprefixer"
+import tailwind from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-  ],
+export default defineConfig(({ isSsrBuild }) => ({
+  plugins: [vue()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
   build: {
+    manifest: isSsrBuild ? false : 'manifest.json',
+    outDir: isSsrBuild ? 'dist/ssr' : 'dist/client',
     rollupOptions: {
-      output: {
-        entryFileNames: `assets/[name].js`,
-        chunkFileNames: `assets/[name].js`,
-        assetFileNames: `assets/[name].[ext]`
-      }
+      input: isSsrBuild ? 'src/ssr.ts' : 'src/main.ts'
     }
   },
   css: {
     postcss: {
-      plugins: [tailwind(), autoprefixer()],
-    },
-  },
-})
+      plugins: [tailwind(), autoprefixer()]
+    }
+  }
+}))
