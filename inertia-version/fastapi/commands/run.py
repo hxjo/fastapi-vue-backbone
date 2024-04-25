@@ -16,17 +16,18 @@ from .print import print_info, print_success
 
 
 def run(up_services: bool = True, host: str = "0.0.0.0", port: int = 8000) -> None:
+    is_first_run = is_first_time()
     if up_services:
         up()
     migrate_db()
     update_indexes_if_needed()
     load_dotenv(override=True)
-    if is_first_time():
+    if is_first_run:
         setup_store()
-    if has_authorization_model_changed():
+    if is_first_run or has_authorization_model_changed():
         print_info("Updating the OpenFGA model...")
         write_authorization_model()
-    if is_first_time():
+    if is_first_run:
         print_info("Migrating seeding data...")
         subprocess.run(["poe", "cmd", "authz", "migrate-existing-data"], check=True)
 

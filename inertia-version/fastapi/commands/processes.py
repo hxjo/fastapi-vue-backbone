@@ -1,8 +1,8 @@
 import os
 import subprocess
 import time
-from typing import Union, TypeAlias
-import queue as Queue
+from typing import Any
+import queue as base_queue
 
 import multiprocessing
 from multiprocessing.synchronize import Event
@@ -10,10 +10,8 @@ import logging
 import logging.handlers
 
 
-QueueType: TypeAlias = multiprocessing.Queue[Union[logging.LogRecord, None]]
 
-
-def setup_logger(queue: QueueType) -> None:
+def setup_logger(queue: Any) -> None:
     """Set up the logger configuration."""
     handler = logging.handlers.QueueHandler(queue)  # Send events to the queue
     root = logging.getLogger()
@@ -21,7 +19,7 @@ def setup_logger(queue: QueueType) -> None:
     root.setLevel(logging.DEBUG)
 
 
-def logger_listener(queue: QueueType) -> None:
+def logger_listener(queue: Any) -> None:
     """Listen for log messages on the queue and process them."""
     try:
         while True:
@@ -31,13 +29,13 @@ def logger_listener(queue: QueueType) -> None:
                     break
                 logger = logging.getLogger(record.name)
                 logger.handle(record)
-            except Queue.Empty:
+            except base_queue.Empty:
                 continue
     except KeyboardInterrupt:
         print("Logger listener received KeyboardInterrupt")
 
 
-def backend(queue: QueueType, host: str, port: int, shutdown_event: Event) -> None:
+def backend(queue: Any, host: str, port: int, shutdown_event: Event) -> None:
     setup_logger(queue)
     logger = logging.getLogger("Backend")
     logger.info("Backend started")
@@ -61,14 +59,14 @@ def backend(queue: QueueType, host: str, port: int, shutdown_event: Event) -> No
         logger.info("Backend shutting down")
 
 
-def frontend(queue: QueueType, shutdown_event: Event) -> None:
+def frontend(queue: Any, shutdown_event: Event) -> None:
     setup_logger(queue)
     logger = logging.getLogger("Frontend")
     logger.info("Frontend started")
     process = None
     try:
         process = subprocess.Popen(
-            ["npm", "run", "dev"],
+            ["npm", "run", "dev", "--", "--host", "0.0.0.0"],
             cwd=os.path.join(os.path.dirname(__file__), "..", "..", "vue"),
         )
         while not shutdown_event.is_set():
@@ -89,10 +87,10 @@ def run_apps(host: str, port: int) -> None:
     logging.basicConfig(
         level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
     )
-    log_queue: QueueType = multiprocessing.Queue()
+    log_queue: Any = multiprocessing.Queue()
 
     listener = multiprocessing.Process(
-        target=logger_listener, args=(log_queue, shutdown_event)
+        target=logger_listener, args=(log_queue,)
     )
     listener.start()
 
