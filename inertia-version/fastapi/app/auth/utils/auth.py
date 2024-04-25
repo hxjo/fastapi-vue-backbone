@@ -70,7 +70,12 @@ def verify_password_reset_token(token: str) -> str:
 ResponseType = TypeVar("ResponseType", bound=Response)
 
 
-def add_token_to_response(response: ResponseType, *, email: Union[str, None] = None, token: Union[str, None] = None) -> ResponseType:
+def add_token_to_response(
+    response: ResponseType,
+    *,
+    email: Union[str, None] = None,
+    token: Union[str, None] = None,
+) -> ResponseType:
     token = create_access_token(data={"email": email}) if token is None else token
     response.set_cookie(
         key="token",
@@ -78,6 +83,7 @@ def add_token_to_response(response: ResponseType, *, email: Union[str, None] = N
         httponly=True,
         samesite=None,
         secure=True,
-        expires=datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        expires=datetime.now(timezone.utc)
+        + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return response

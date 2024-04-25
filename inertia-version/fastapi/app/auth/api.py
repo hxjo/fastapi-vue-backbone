@@ -19,21 +19,27 @@ from app.common.deps.common import AnnotatedCommonDep
 from app.common.deps.db import SessionDep
 from app.common.deps.inertia import InertiaDep
 from app.common.exceptions import BadRequestException, NotFoundException
-from app.libs.inertia import InertiaResponse
+from inertia import InertiaResponse
 from app.user.repository import UserRepo
 
 router = APIRouter()
 
 
 @router.get(
-    "/signup", dependencies=[RedirectIfAlreadyLoggedInDep], include_in_schema=False, response_model=None
+    "/signup",
+    dependencies=[RedirectIfAlreadyLoggedInDep],
+    include_in_schema=False,
+    response_model=None,
 )
 async def signup(inertia: InertiaDep) -> InertiaResponse:
     return await inertia.render("auth/SignupView")
 
 
 @router.get(
-    "/login", dependencies=[RedirectIfAlreadyLoggedInDep], include_in_schema=False, response_model=None
+    "/login",
+    dependencies=[RedirectIfAlreadyLoggedInDep],
+    include_in_schema=False,
+    response_model=None,
 )
 async def login(inertia: InertiaDep) -> InertiaResponse:
     return await inertia.render("auth/LoginView")
@@ -41,7 +47,10 @@ async def login(inertia: InertiaDep) -> InertiaResponse:
 
 @router.post("/api/login", response_model=None)
 async def api_login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], *, session: SessionDep, inertia: InertiaDep
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    *,
+    session: SessionDep,
+    inertia: InertiaDep,
 ) -> RedirectResponse:
     try:
         token = await UserRepo.authenticate(
@@ -72,7 +81,9 @@ async def logout() -> RedirectResponse:
 
 
 @router.post("/api/recover-password/{email}", status_code=204, response_model=None)
-async def send_recover_password_email(email: str, *, session: SessionDep, inertia: InertiaDep) -> RedirectResponse:
+async def send_recover_password_email(
+    email: str, *, session: SessionDep, inertia: InertiaDep
+) -> RedirectResponse:
     response = RedirectResponse(url="/recover-password", status_code=303)
     try:
         user = await UserRepo.get_by_email(
@@ -89,7 +100,9 @@ async def send_recover_password_email(email: str, *, session: SessionDep, inerti
 
 
 @router.post("/api/reset-password/", status_code=201, response_model=None)
-async def reset_password(body: NewPassword, *, deps: AnnotatedCommonDep, inertia: InertiaDep) -> RedirectResponse:
+async def reset_password(
+    body: NewPassword, *, deps: AnnotatedCommonDep, inertia: InertiaDep
+) -> RedirectResponse:
     """
     Reset password
     """
@@ -117,7 +130,7 @@ templates = Jinja2Templates(directory="app/utils")
     "/recover-password",
     dependencies=[RedirectIfAlreadyLoggedInDep],
     include_in_schema=False,
-    response_model=None
+    response_model=None,
 )
 async def recover_password_view(inertia: InertiaDep) -> InertiaResponse:
     return await inertia.render("auth/RecoverPasswordView")
@@ -127,7 +140,7 @@ async def recover_password_view(inertia: InertiaDep) -> InertiaResponse:
     "/reset-password",
     dependencies=[RedirectIfAlreadyLoggedInDep],
     include_in_schema=False,
-    response_model=None
+    response_model=None,
 )
 async def reset_password_view(inertia: InertiaDep, token: str) -> InertiaResponse:
     try:
@@ -135,5 +148,6 @@ async def reset_password_view(inertia: InertiaDep, token: str) -> InertiaRespons
     except InvalidTokenException:
         email = None
 
-    return await inertia.render("auth/ResetPasswordView", {"email": email, "token": token})
-
+    return await inertia.render(
+        "auth/ResetPasswordView", {"email": email, "token": token}
+    )

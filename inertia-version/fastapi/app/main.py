@@ -9,8 +9,8 @@ from app.api_v1 import api_router_v1
 from app.auth.api import router as auth_router
 from app.auth.exceptions import AlreadyLoggedInException, InvalidTokenException
 from app.webapp.api import webapp_router
-from app.libs.inertia import (
-    inertia_exception_handler,
+from inertia import (
+    inertia_version_conflict_exception_handler,
     InertiaVersionConflictException,
     InertiaConfig,
 )
@@ -50,10 +50,13 @@ app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
 create_admin(app)
 
-app.add_exception_handler(CommonDetailedException, common_error_handler)
+app.add_exception_handler(CommonDetailedException, common_error_handler)  # type: ignore[arg-type]
 app.add_exception_handler(AlreadyLoggedInException, already_logged_in_handler)
 app.add_exception_handler(InvalidTokenException, invalid_token_handler)
-app.add_exception_handler(InertiaVersionConflictException, inertia_exception_handler)
+app.add_exception_handler(
+    InertiaVersionConflictException,
+    inertia_version_conflict_exception_handler,  # type: ignore[arg-type]
+)
 
 
 vue_dir = (

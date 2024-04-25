@@ -17,7 +17,7 @@ index_name_search_map = {
 }
 
 
-def update_indexes_if_needed():
+def update_indexes_if_needed() -> None:
     stats = meili_search_client.get_all_stats()
     with Session(engine) as session:
         for index_name, index_value in stats["indexes"].items():

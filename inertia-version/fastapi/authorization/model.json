@@ -1,100 +1,190 @@
 {
+    "id": "01HWAJA7P4V7TTB6CSK2E4YPDA",
     "schema_version": "1.1",
     "type_definitions": [
         {
+            "type": "app",
+            "relations": {
+                "client": {
+                    "this": null,
+                    "computed_userset": null,
+                    "tuple_to_userset": null,
+                    "union": {
+                        "child": [
+                            {
+                                "this": {},
+                                "computed_userset": null,
+                                "tuple_to_userset": null,
+                                "union": null,
+                                "intersection": null,
+                                "difference": null
+                            },
+                            {
+                                "this": null,
+                                "computed_userset": {
+                                    "object": "",
+                                    "relation": "superuser"
+                                },
+                                "tuple_to_userset": null,
+                                "union": null,
+                                "intersection": null,
+                                "difference": null
+                            }
+                        ]
+                    },
+                    "intersection": null,
+                    "difference": null
+                },
+                "superuser": {
+                    "this": {},
+                    "computed_userset": null,
+                    "tuple_to_userset": null,
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
+                }
+            },
             "metadata": {
                 "relations": {
                     "client": {
                         "directly_related_user_types": [
                             {
-                                "type": "user"
+                                "type": "user",
+                                "relation": null,
+                                "wildcard": null,
+                                "condition": ""
                             }
-                        ]
+                        ],
+                        "module": null,
+                        "source_info": null
                     },
                     "superuser": {
                         "directly_related_user_types": [
                             {
-                                "type": "user"
+                                "type": "user",
+                                "relation": null,
+                                "wildcard": null,
+                                "condition": ""
                             }
-                        ]
-                    }
-                }
-            },
-            "relations": {
-                "client": {
-                    "union": {
-                        "child": [
-                            {
-                                "this": {}
-                            },
-                            {
-                                "computedUserset": {
-                                    "relation": "superuser"
-                                }
-                            }
-                        ]
+                        ],
+                        "module": null,
+                        "source_info": null
                     }
                 },
-                "superuser": {
-                    "this": {}
+                "module": null,
+                "source_info": null
+            }
+        },
+        {
+            "type": "user",
+            "relations": {},
+            "metadata": null
+        },
+        {
+            "type": "user_self",
+            "relations": {
+                "can_delete": {
+                    "this": null,
+                    "computed_userset": {
+                        "object": "",
+                        "relation": "self_user"
+                    },
+                    "tuple_to_userset": null,
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
+                },
+                "can_read": {
+                    "this": null,
+                    "computed_userset": null,
+                    "tuple_to_userset": {
+                        "tupleset": {
+                            "object": "",
+                            "relation": "parent_app"
+                        },
+                        "computed_userset": {
+                            "object": "",
+                            "relation": "client"
+                        }
+                    },
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
+                },
+                "can_update": {
+                    "this": null,
+                    "computed_userset": {
+                        "object": "",
+                        "relation": "self_user"
+                    },
+                    "tuple_to_userset": null,
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
+                },
+                "parent_app": {
+                    "this": {},
+                    "computed_userset": null,
+                    "tuple_to_userset": null,
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
+                },
+                "self_user": {
+                    "this": {},
+                    "computed_userset": null,
+                    "tuple_to_userset": null,
+                    "union": null,
+                    "intersection": null,
+                    "difference": null
                 }
             },
-            "type": "app"
-        },
-        {
-            "type": "user"
-        },
-        {
             "metadata": {
                 "relations": {
-                    "can_delete": {},
-                    "can_read": {},
-                    "can_update": {},
+                    "can_delete": {
+                        "directly_related_user_types": [],
+                        "module": null,
+                        "source_info": null
+                    },
+                    "can_read": {
+                        "directly_related_user_types": [],
+                        "module": null,
+                        "source_info": null
+                    },
+                    "can_update": {
+                        "directly_related_user_types": [],
+                        "module": null,
+                        "source_info": null
+                    },
                     "parent_app": {
                         "directly_related_user_types": [
                             {
-                                "type": "app"
+                                "type": "app",
+                                "relation": null,
+                                "wildcard": null,
+                                "condition": ""
                             }
-                        ]
+                        ],
+                        "module": null,
+                        "source_info": null
                     },
                     "self_user": {
                         "directly_related_user_types": [
                             {
-                                "type": "user"
+                                "type": "user",
+                                "relation": null,
+                                "wildcard": null,
+                                "condition": ""
                             }
-                        ]
-                    }
-                }
-            },
-            "relations": {
-                "can_delete": {
-                    "computedUserset": {
-                        "relation": "self_user"
+                        ],
+                        "module": null,
+                        "source_info": null
                     }
                 },
-                "can_read": {
-                    "tupleToUserset": {
-                        "computedUserset": {
-                            "relation": "client"
-                        },
-                        "tupleset": {
-                            "relation": "parent_app"
-                        }
-                    }
-                },
-                "can_update": {
-                    "computedUserset": {
-                        "relation": "self_user"
-                    }
-                },
-                "parent_app": {
-                    "this": {}
-                },
-                "self_user": {
-                    "this": {}
-                }
-            },
-            "type": "user_self"
+                "module": null,
+                "source_info": null
+            }
         }
-    ]
+    ],
+    "conditions": {}
 }

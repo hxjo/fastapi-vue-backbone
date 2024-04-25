@@ -39,7 +39,7 @@ def exec_app(service: str, *, tty: bool = False) -> List[str]:
 
 
 @app.command()
-def up():
+def up() -> None:
     """
     Start the services
     """
@@ -70,7 +70,7 @@ def up():
 
 
 @app.command()
-def upall():
+def upall() -> None:
     """
     Start the services + the fastapi service
     """
@@ -86,7 +86,7 @@ def upall():
 
 
 @app.command()
-def stop():
+def stop() -> None:
     """
     Stop the application
     """
@@ -102,7 +102,7 @@ def stop():
 
 
 @app.command()
-def wipe(yes: bool = False):
+def wipe(yes: bool = False) -> None:
     """
     Wipe the application
     """
@@ -129,13 +129,16 @@ def wipe(yes: bool = False):
 
 
 @app.command()
-def psql():
+def psql() -> None:
     """
     Open a psql shell
     """
     print_info("Opening a psql shell...")
-    postgres_user = os.getenv("POSTGRES_USER")
-    postgres_db = os.getenv("POSTGRES_DB")
+    postgres_user = os.getenv("POSTGRES_USER", None)
+    postgres_db = os.getenv("POSTGRES_DB", None)
+    if postgres_user is None or postgres_db is None:
+        print_error("POSTGRES_USER or POSTGRES_DB is not set in the .env file")
+        return
     exec_app_cmd = exec_app("db", tty=True)
     try:
         subprocess.run(
@@ -148,13 +151,16 @@ def psql():
 
 
 @app.command()
-def recreate_db():
+def recreate_db() -> None:
     """
     Drop the database and recreate it
     """
     print_info("Recreating the database...")
-    postgres_user = os.getenv("POSTGRES_USER")
-    postgres_db = os.getenv("POSTGRES_DB")
+    postgres_user = os.getenv("POSTGRES_USER", None)
+    postgres_db = os.getenv("POSTGRES_DB", None)
+    if postgres_user is None or postgres_db is None:
+        print_error("POSTGRES_USER or POSTGRES_DB is not set in the .env file")
+        return
     exec_app_cmd = exec_app("db", tty=True)
     try:
         subprocess.run(
@@ -172,7 +178,7 @@ def recreate_db():
 
 
 @app.command()
-def migrate_db():
+def migrate_db() -> None:
     """
     Initialize the database: Migration + Seed
     """
@@ -187,7 +193,7 @@ def migrate_db():
 
 
 @app.command()
-def first_setup():
+def first_setup() -> None:
     """
     First setup: Up + Init DB
     """
@@ -196,7 +202,7 @@ def first_setup():
 
 
 @app.command()
-def i(allow_back: bool = False):
+def i(allow_back: bool = False) -> None:
     """
     Interactive mode
     """

@@ -1,10 +1,56 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
+package-mode = false
 name = "backbone"
 version = "0.1.0"
+description = ""
+authors = ["Hugo Mortreux <70602545+hxjo@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+poethepoet = "^0.25.1"
+python-dotenv = "^1.0.1"
+fastapi = "^0.110.2"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+sqlalchemy = "^2.0.29"
+alembic = "^1.13.1"
+bcrypt = "^4.1.2"
+python-multipart = "^0.0.9"
+python-jose = "^3.3.0"
+sqladmin = "^0.16.1"
+greenlet = "^3.0.3"
+itsdangerous = "^2.2.0"
+typer = {extras = ["all"], version = "^0.12.3"}
+minio = "^7.2.5"
+fastapi-storages = {extras = ["all"], version = "^0.3.0"}
+sqlmodel = "^0.0.16"
+pydantic-settings = "^2.2.1"
+pydantic = {extras = ["email"], version = "^2.7.1"}
+emails = "^0.6"
+meilisearch = "^0.31.0"
+openfga-sdk = "^0.4.2"
+pytest-asyncio = "^0.23.6"
+asyncpg = "^0.29.0"
+ujson = "^5.9.0"
+psycopg2-binary = "^2.9.9"
+types-python-jose = "^3.3.4.20240106"
+fastapi-inertia = "^0.1.2"
+
+
+[tool.poetry.group.test.dependencies]
+pytest-asyncio = "^0.23.6"
+pytest = "^8.1.1"
+pytest-xdist = "^3.5.0"
+httpx = "^0.27.0"
+
+
+[tool.poetry.group.lint.dependencies]
+ruff = "^0.4.1"
+mypy = "^1.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 strict = true
@@ -14,6 +60,7 @@ exclude = [
     'conftest\.py$',
     '/tests/',
     '/test_utils/',
+    'alembic/'
 ]
 
     [[tool.mypy.overrides]]
@@ -34,7 +81,7 @@ migrate = "alembic upgrade head"
 rollback = "alembic downgrade -1"
 shell = "python3 -i -m commands.shell"
 
-mypy = "mypy app/"
+mypy = "mypy ."
 ruff_lint_check = "ruff check ."
 
 format = "ruff format ."

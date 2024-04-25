@@ -2,7 +2,7 @@ import os
 import importlib
 
 
-def import_all_models():
+def import_all_models() -> None:
     # Define the path to the modules directory
     modules_path = os.path.join("app", "modules")
 

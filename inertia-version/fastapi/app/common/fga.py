@@ -12,6 +12,7 @@ UserRole = Literal["superuser", "user"]
 
 logger = logging.getLogger(__name__)
 
+
 class BaseFGA:
     object_name: str
 
@@ -19,7 +20,9 @@ class BaseFGA:
     def has_user_relationship(
         cls, user_id: int, relationship: str, target_object_id: int
     ) -> ClientCheckRequest:
-        logger.info(f"Checking relationship {relationship} between initiator {user_id} and object {target_object_id}")
+        logger.info(
+            f"Checking relationship {relationship} between initiator {user_id} and object {target_object_id}"
+        )
         return ClientCheckRequest(
             user=f"user:{user_id}",
             relation=relationship,
@@ -38,7 +41,9 @@ class BaseFGA:
         role: LiteralString,
         object_id: int,
     ) -> None:
-        logger.info(f"Creating relationship {role} between initiator {user_id} and object {object_id}")
+        logger.info(
+            f"Creating relationship {role} between initiator {user_id} and object {object_id}"
+        )
         body = ClientWriteRequest(
             writes=cls.get_tuples(user_id, role, object_id),
         )
@@ -52,8 +57,9 @@ class BaseFGA:
         role: LiteralString,
         object_id: int,
     ) -> None:
-
-        logger.info(f"Deleting relationship {role} between initiator {user_id} and object {object_id}")
+        logger.info(
+            f"Deleting relationship {role} between initiator {user_id} and object {object_id}"
+        )
         body = ClientWriteRequest(deletes=cls.get_tuples(user_id, role, object_id))
         await fga_client.write(body)
 
