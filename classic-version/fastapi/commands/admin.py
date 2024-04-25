@@ -1,4 +1,5 @@
 import asyncio
+from typing import cast
 
 import typer
 from rich.prompt import IntPrompt, Prompt
@@ -25,7 +26,7 @@ def create_superuser() -> None:
     asyncio.run(async_create_superuser())
 
 
-async def async_create_superuser():
+async def async_create_superuser() -> None:
     """
     Create a new superuser
     """
@@ -47,7 +48,7 @@ async def async_create_superuser():
     print_success(f"Superuser created successfully with id {user.id}")
     config = get_fga_client_config()
     async with OpenFgaClient(config) as fga_client:
-        await UserFGA.create_relationships(fga_client, user.id, "superuser")
+        await UserFGA.create_relationships(fga_client, cast(int, user.id), "superuser")
 
 
 @app.command()
@@ -85,13 +86,16 @@ async def async_set_superuser() -> None:
             user.is_superuser = True
             session.commit()
             print_success("User is now a superuser")
+        case _:
+            print_error("Invalid choice")
+            return set_superuser()
     config = get_fga_client_config()
     async with OpenFgaClient(config) as fga_client:
-        await UserFGA.create_relationships(fga_client, user.id, "superuser")
+        await UserFGA.create_relationships(fga_client, cast(int, user.id), "superuser")
 
 
 @app.command()
-def i(allow_back: bool = False):
+def i(allow_back: bool = False) -> None:
     """
     Interactive mode
     """

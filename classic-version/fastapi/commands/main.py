@@ -11,7 +11,7 @@ from app.core.config import settings
 ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
-def update_openapi():
+def update_openapi() -> None:
     # Url to fetch:
     typer.echo("Updating OpenAPI docs...")
 
@@ -25,7 +25,7 @@ def update_openapi():
     typer.echo("Done!")
 
 
-def i():
+def i() -> None:
     common_func_args = {"allow_back": True}
     handle_options(
         [

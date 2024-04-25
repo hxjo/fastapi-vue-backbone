@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from typing import cast
 
 import typer
 from dotenv import load_dotenv
@@ -29,7 +30,7 @@ AUTHORIZATION_MODEL_ID_FILE = os.path.join(
 STORE_ID_FILE = os.path.join(ABSOLUTE_PATH, "..", "app", ".fga_store_id")
 
 
-def get_fga_client_config():
+def get_fga_client_config() -> ClientConfiguration:
     if not os.path.isfile(AUTHORIZATION_MODEL_ID_FILE):
         with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
             file.write("")
@@ -49,7 +50,7 @@ def get_fga_client_config():
 
 
 @app.command()
-def setup_store():
+def setup_store() -> None:
     config = get_fga_client_config()
     with OpenFgaClient(config) as client:
         create_store_request = CreateStoreRequest(
@@ -63,7 +64,7 @@ def setup_store():
 
 
 @app.command()
-def model_to_json():
+def model_to_json() -> None:
     """
     Convert model to json
     """
@@ -94,15 +95,25 @@ def model_to_json():
         return
 
 
+def has_authorization_model_changed() -> bool:
+    with open(JSON_AUTHZ_MODEL, "r", encoding="utf-8") as model:
+        model_json = json.load(model)
+
+    config = get_fga_client_config()
+    with OpenFgaClient(config) as client:
+        response = client.read_authorization_model()
+        return cast(bool, response.authorization_model.id != model_json.get("id"))
+
+
 @app.command()
-def write_authorization_model():
+def write_authorization_model() -> None:
     load_dotenv(override=True)
     with open(STORE_ID_FILE, "r", encoding="utf-8") as file:
         store_id = file.read().strip()
     if store_id == "":
         print_error("Store ID is not set")
         return
-    with open(JSON_AUTHZ_MODEL, "r", encoding="utf-8") as model:
+    with open(JSON_AUTHZ_MODEL, "r+", encoding="utf-8") as model:
         model_json = json.load(model)
         config = get_fga_client_config()
         with OpenFgaClient(config) as client:
@@ -111,11 +122,17 @@ def write_authorization_model():
             print_success("Authorization model written successfully")
             with open(AUTHORIZATION_MODEL_ID_FILE, "w", encoding="utf-8") as file:
                 file.write(response.authorization_model_id)
+        with OpenFgaClient(get_fga_client_config()) as client:
+            response = client.read_authorization_model()
+            auth_model = response.to_dict().get("authorization_model", {})
+            model.seek(0)
+            model.write(json.dumps(auth_model, indent=4))
+            model.truncate()
 
             print_success("Your authorization file has been updated")
 
 
-def is_first_time():
+def is_first_time() -> bool:
     config = get_fga_client_config()
     with OpenFgaClient(config) as client:
         existing_stores_res = client.list_stores()
@@ -123,7 +140,7 @@ def is_first_time():
 
 
 @app.command()
-def setup():
+def setup() -> None:
     """
     Setup FGA store and write authorization model
     """
@@ -132,7 +149,7 @@ def setup():
 
 
 @app.command()
-def migrate_existing_data():
+def migrate_existing_data() -> None:
     """
     Migrate existing data
     """
@@ -140,7 +157,7 @@ def migrate_existing_data():
 
 
 @app.command()
-def test_model():
+def test_model() -> None:
     try:
         subprocess.run(["fga", "version"], check=True)
     except FileNotFoundError:
@@ -160,13 +177,13 @@ def test_model():
 
 
 @app.command()
-def update():
+def update() -> None:
     model_to_json()
     write_authorization_model()
 
 
 @app.command()
-def i(allow_back: bool = False):
+def i(allow_back: bool = False) -> None:
     """
     Interactive mode
     """

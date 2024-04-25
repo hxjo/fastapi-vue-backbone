@@ -1,6 +1,16 @@
 import json
 import time
-from typing import Any, Dict, Generic, List, Optional, TypedDict, TypeVar, cast
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    TypedDict,
+    TypeVar,
+    cast,
+    Iterable,
+)
 
 import meilisearch
 from meilisearch.errors import MeilisearchApiError
@@ -59,7 +69,7 @@ class MeiliSearchBaseClass(Generic[ModelT]):
         return meili_search_client.get_task(task_id)
 
     @staticmethod
-    def get_formatted_documents(objs_in: List[ModelT]) -> List[Dict[str, Any]]:
+    def get_formatted_documents(objs_in: Iterable[ModelT]) -> List[Dict[str, Any]]:
         return [json.loads(obj_in.model_dump_json()) for obj_in in objs_in]
 
     def search(
@@ -68,7 +78,7 @@ class MeiliSearchBaseClass(Generic[ModelT]):
         opts = opts or {}
         return cast(SearchResultT, self.index.search(query, opts))
 
-    def add_documents(self, entities: List[ModelT]) -> Task:
+    def add_documents(self, entities: Iterable[ModelT]) -> Task:
         documents = self.get_formatted_documents(entities)
         task_info = self.index.add_documents(documents)
         task_uid = task_info.task_uid
@@ -82,7 +92,7 @@ class MeiliSearchBaseClass(Generic[ModelT]):
 
         return task
 
-    def update_documents(self, entities: List[ModelT]) -> Task:
+    def update_documents(self, entities: Iterable[ModelT]) -> Task:
         documents = self.get_formatted_documents(entities)
         task_info = self.index.update_documents(documents)
         task_uid = task_info.task_uid

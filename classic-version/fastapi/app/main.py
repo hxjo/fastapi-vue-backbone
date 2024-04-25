@@ -29,4 +29,4 @@ app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 
 create_admin(app)
 
-app.add_exception_handler(CommonDetailedException, common_error_handler)
+app.add_exception_handler(CommonDetailedException, common_error_handler)  # type: ignore[arg-type]
